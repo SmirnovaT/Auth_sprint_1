@@ -1,0 +1,33 @@
+### AUTH SERVICE
+
+### AUTH SERVICE для кинотеатра
+
+____________________________________________________________________________
+Как запустить проект и проверить его работу
+____________________________________________________________________________
+ 
+Необходимо заполнить .env по шаблону .env_example
+
+Запуск приложения с docker compose
+```
+docker-compose up --build
+or
+docker-compose up --build -d
+```
+
+Запуск приложения для локальной разработки
+```
+1. cd auth_service
+
+2. python3.12 -m venv venv
+
+3. source venv/bin/activate
+
+4. pip3 install poetry
+
+5. poetry install (or python -m poetry install)
+
+7. docker run -p 6379:6379 redis:7.2.4-alpine
+ 
+8. uvicorn src.main:app --reload --host 0.0.0.0 --port 8000 --workers 4
+```
