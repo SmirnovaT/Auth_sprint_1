@@ -1,0 +1,69 @@
+services:
+  base:
+    build:
+      context: ../../../auth_service
+      dockerfile: Dockerfile
+      target: builder
+    image: fastapi-image
+
+  auth-service:
+    build: ../../../auth_service
+    env_file:
+      - ../../../auth_service/.env
+    restart: always
+    depends_on:
+      users_db:
+        condition: service_started
+      cache:
+        condition: service_started
+    networks:
+      - testnetwork
+
+  tests:
+    build: .
+    depends_on:
+      base:
+        condition: service_completed_successfully
+      auth-service:
+        condition: service_started
+      users_db:
+        condition: service_started
+      cache:
+        condition: service_started
+    environment:
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      ELASTIC_HOST: ${ELASTIC_HOST}
+      ELASTIC_PORT: ${ELASTIC_PORT}
+    networks:
+      - testnetwork
+
+  users_db:
+    image: postgres:16.0
+    restart: always
+    container_name: users_db
+    env_file:
+      - ../../../auth_service/.env
+    networks:
+      - testnetwork
+    volumes:
+      - ./db/postgres_data:/var/lib/postgresql/data
+    healthcheck:
+       test: ["CMD-SHELL", "pg_isready -h localhost -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+       interval: 5s
+       timeout: 10s
+       retries: 5
+
+  cache:
+    image: redis:7.2.4-alpine
+    env_file:
+      - ../../../auth_service/.env
+    volumes:
+     - ../../../auth_service/redis-data:/var/lib/redis
+    networks:
+      - testnetwork
+
+
+
+networks:
+  testnetwork:
