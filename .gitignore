@@ -103,3 +103,7 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
+
+
+postgres_data/
+
