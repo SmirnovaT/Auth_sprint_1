@@ -2,9 +2,7 @@ import logging.config
 
 
 LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-LOG_DEFAULT_HANDLERS = [
-    "console",
-]
+LOG_DEFAULT_HANDLERS = ["console", ]
 
 
 LOGGING = {
@@ -62,4 +60,4 @@ LOGGING = {
 
 
 logging.config.dictConfig(LOGGING)
-a_api_logger = logging.getLogger("async_api_logger")
+auth_logger = logging.getLogger("auth_service_logger")
