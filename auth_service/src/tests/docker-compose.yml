@@ -12,7 +12,7 @@ services:
       - ../../../auth_service/.env
     restart: always
     depends_on:
-      search:
+      users_db:
         condition: service_started
       cache:
         condition: service_started
@@ -26,7 +26,7 @@ services:
         condition: service_completed_successfully
       auth-service:
         condition: service_started
-      search:
+      users_db:
         condition: service_started
       cache:
         condition: service_started
@@ -38,19 +38,21 @@ services:
     networks:
       - testnetwork
 
-  search:
-    image: krissmelikova/awesome_repository:v1
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - cluster.routing.allocation.disk.threshold_enabled=false
-    healthcheck:
-       test: curl -s http://fastapi-solutions-search-1:9200
-       interval: 30s
-       timeout: 10s
-       retries: 50
+  users_db:
+    image: postgres:16.0
+    restart: always
+    container_name: users_db
+    env_file:
+      - ../../../auth_service/.env
     networks:
       - testnetwork
+    volumes:
+      - ./db/postgres_data:/var/lib/postgresql/data
+    healthcheck:
+       test: ["CMD-SHELL", "pg_isready -h localhost -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+       interval: 5s
+       timeout: 10s
+       retries: 5
 
   cache:
     image: redis:7.2.4-alpine

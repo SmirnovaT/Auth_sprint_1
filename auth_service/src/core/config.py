@@ -14,7 +14,10 @@ class Settings(BaseSettings):
     postgres_password: str
     postgres_host: str
     postgres_port: int
-
+    redis_host: str
+    redis_port: int
+    redis_user: str
+    redis_password: str
     model_config = SettingsConfigDict(
         env_file=Path(__file__).resolve().parent.parent.parent / ".env"
     )

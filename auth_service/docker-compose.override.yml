@@ -2,11 +2,11 @@ services:
 
   auth-service:
     ports:
-      - "8000:8000"
+      - "8010:8010"
 
-  search:
+  users_db:
     ports:
-      - "9200:9200"
+      - "5432:5432"
 
   nginx:
     ports:
