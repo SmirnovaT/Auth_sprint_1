@@ -1,6 +1,10 @@
-import aiohttp
 import asyncio
+import logging
 import time
+
+import aiohttp
+
+
 
 
 async def get_status(service_url, client):
@@ -12,11 +16,14 @@ async def wait_for_ok(service_url):
     async with aiohttp.ClientSession() as client:
         for _ in range(100):
             time.sleep(10)
-            status = await get_status(service_url, client)
+            try:
+                status = await get_status(service_url, client)
+            except Exception as e:
+                logging.error(e)
             if status == 200:
                 break
 
 
-service_url = "http://service:8000/api/v1/films/"
+service_url = "http://auth-service:8010/"
 loop = asyncio.new_event_loop()
 loop.run_until_complete(wait_for_ok(service_url))

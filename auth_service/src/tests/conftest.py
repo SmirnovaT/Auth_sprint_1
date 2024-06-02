@@ -14,7 +14,7 @@ async def clean_cache():
     """Удаление всех ключей из Redis (из текущей db)"""
 
     redis = Redis.from_url(
-        f"redis://{test_settings.REDIS.REDIS_HOST}:{test_settings.REDIS.REDIS_PORT}",
+        f"redis://{test_settings.redis.redis_host}:{test_settings.redis.redis_port}",
     )
     await redis.flushdb()
     yield redis
@@ -45,7 +45,7 @@ async def make_get_request(client_session):
 
     async def inner(endpoint: str, params: dict | None = None) -> tuple[Any, Any]:
         params = params or {}
-        url = urljoin(test_settings.MOVIES_API_URL, endpoint)
+        url = urljoin(test_settings.auth_api_url, endpoint)
         async with client_session.get(url, params=params) as raw_response:
             response = await raw_response.json()
             status = raw_response.status
