@@ -39,7 +39,7 @@ async def calculate_iat_and_exp_tokens() -> Tuple[int, int, int]:
 
 
 async def create_access_and_refresh_tokens(
-    user_login: str, user_role: str
+        user_login: str, user_role: str
 ) -> Tuple[str, str]:
     """Creates a pair of access and refresh tokens"""
 
@@ -83,3 +83,25 @@ async def create_access_and_refresh_tokens(
         raise HTTPException(status_code=500, detail="Error while JWT encoding")
 
     return encoded_access_token, encoded_refresh_token
+
+
+async def validate_token(token: str) -> dict[str, str]:
+    """Validates token"""
+
+    try:
+        decoded_token: dict[str, str] = jwt.decode(
+            jwt=token,
+            key=settings.public_key,
+            algorithms=['RS256'],
+        )
+    except jwt.exceptions.DecodeError as decode_error:
+        auth_logger.error(f"Error while JWT decoding: {decode_error}")
+        raise HTTPException(status_code=401, detail="Неверный токен")
+    except jwt.ExpiredSignatureError:
+        auth_logger.error("Срок действия токена истек")
+        raise HTTPException(status_code=401, detail="Срок действия токена истек")
+    except ValueError as err:
+        auth_logger.error(f"Error while JWT decoding: {err}")
+        raise HTTPException(status_code=500, detail="Error while JWT decoding")
+
+    return decoded_token
