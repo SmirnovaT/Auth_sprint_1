@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     public_key: str
     private_key: str
 
+    db_dsn: str
     postgres_host: str
     postgres_port: int
     postgres_db: str

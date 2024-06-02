@@ -34,4 +34,6 @@ docker-compose up --build -d
 7. docker run -p 6379:6379 redis:7.2.4-alpine
  
 8. uvicorn src.main:app --reload --host 0.0.0.0 --port 8000 --workers 4
+
+9. alembic upgrade head
 ```
