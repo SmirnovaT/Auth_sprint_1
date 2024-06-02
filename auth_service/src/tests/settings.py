@@ -7,23 +7,23 @@ load_dotenv()
 class RedisSettings(BaseSettings):
     """Конфигурация для Redis"""
 
-    REDIS_HOST: str = "127.0.0.1"
-    REDIS_PORT: int = 6379
+    redis_host: str = "127.0.0.1"
+    redis_port: int = 6379
 
 
 class PostgresSettings(BaseSettings):
     """Конфигурация для Postgres"""
 
-    POSTGRES_HOST: str = "127.0.0.1"
-    POSTGRES_PORT: int = 5432
+    postgres_host: str = "127.0.0.1"
+    postgres_port: int = 5432
 
 
 class TestSettings(BaseSettings):
     """Конфигурация проекта для тестирования"""
 
-    AUTH_API_URL: str = "http://127.0.0.1:8010"
-    REDIS: RedisSettings = RedisSettings()
-    POSTGRES: PostgresSettings = PostgresSettings()
+    auth_api_url: str = "http://127.0.0.1:8010"
+    redis: RedisSettings = RedisSettings()
+    postgres: PostgresSettings = PostgresSettings()
 
 
 test_settings = TestSettings()
