@@ -17,8 +17,9 @@ class Role(Base, TimestampMixin):
         primary_key=True,
         default=uuid.uuid4,
         unique=True,
-        nullable=False, comment='Идентификатор роли'
+        nullable=False,
+        comment="Идентификатор роли",
     )
-    name = Column(String(255), comment='Название роли')
+    name = Column(String(255), comment="Название роли")
 
     users = relationship("User", back_populates="role")

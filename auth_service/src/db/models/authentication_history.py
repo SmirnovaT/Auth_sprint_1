@@ -18,11 +18,22 @@ class AuthenticationHistory(Base, TimestampMixin):
         default=uuid.uuid4,
         unique=True,
         nullable=False,
-        index=True, comment='Идентификатор аутентификации'
+        index=True,
+        comment="Идентификатор аутентификации",
     )
-    success = Column(Boolean, nullable=False, comment="Флаг, указывающий, был ли вход успешным (True) или нет (False)")
-    user_agent = Column(String, comment="Информация о браузере и операционной системе пользователя")
+    success = Column(
+        Boolean,
+        nullable=False,
+        comment="Флаг, указывающий, был ли вход успешным (True) или нет (False)",
+    )
+    user_agent = Column(
+        String, comment="Информация о браузере и операционной системе пользователя"
+    )
 
-    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False,
-                     comment="Идентификатор пользователя, связанного с этой записью о входе")
-    user = relationship('User', back_populates='authentication_histories')
+    user_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=False,
+        comment="Идентификатор пользователя, связанного с этой записью о входе",
+    )
+    user = relationship("User", back_populates="authentication_histories")

@@ -19,25 +19,35 @@ class User(Base, TimestampMixin):
         default=uuid.uuid4,
         unique=True,
         nullable=False,
-        index=True, comment='Идентификатор пользователя'
+        index=True,
+        comment="Идентификатор пользователя",
     )
-    login = Column(String(255), unique=True, nullable=False, comment='Логин пользователя')
-    email = Column(String(255), unique=True, nullable=False, comment='Электронный адрес пользователя')
-    password = Column(String(255), nullable=False, comment='Пароль пользователя')
-    first_name = Column(String(50), comment='Имя пользователя')
-    last_name = Column(String(50), comment='Фамилия пользователя')
+    login = Column(
+        String(255), unique=True, nullable=False, comment="Логин пользователя"
+    )
+    email = Column(
+        String(255),
+        unique=True,
+        nullable=False,
+        comment="Электронный адрес пользователя",
+    )
+    password = Column(String(255), nullable=False, comment="Пароль пользователя")
+    first_name = Column(String(50), comment="Имя пользователя")
+    last_name = Column(String(50), comment="Фамилия пользователя")
 
-    role_id = Column(UUID(as_uuid=True),
-                     ForeignKey("roles.id", ondelete="RESTRICT"),
-                     comment="Идентификатор роли пользователя",
-                     )
+    role_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("roles.id", ondelete="RESTRICT"),
+        comment="Идентификатор роли пользователя",
+    )
     role = relationship("Role", back_populates="users")
 
-    authentication_histories = relationship("AuthenticationHistory", back_populates="user")
-
+    authentication_histories = relationship(
+        "AuthenticationHistory", back_populates="user"
+    )
 
     def __init__(
-            self, login: str, password: str, first_name: str, last_name: str
+        self, login: str, password: str, first_name: str, last_name: str
     ) -> None:
         self.login = login
         self.password = self.password = generate_password_hash(password)
