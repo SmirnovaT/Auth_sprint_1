@@ -20,4 +20,4 @@ RUN groupadd -r web && useradd -d /opt/app-r -g web web \
 USER web
 
 
-CMD ["gunicorn", "src.main:app", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8010"]
+CMD ["bash", "-c", "alembic upgrade head && gunicorn src.main:app -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8010"]
