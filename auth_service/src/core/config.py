@@ -10,6 +10,7 @@ class Settings(BaseSettings):
 
     project_name: str = "auth_service"
 
+    auth_algorithm: str
     public_key: str
     private_key: str
 
