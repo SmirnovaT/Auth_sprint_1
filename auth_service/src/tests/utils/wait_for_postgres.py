@@ -20,7 +20,7 @@ while True:
     time.sleep(10)
     try:
         conn_pg.execute(
-            """SELECT * FROM pg_catalog.pg_tables""")
+            """SELECT 1;""")
         break
     except Exception as e:
         logging.error(f"Couldn't connect to postgres: {e}")
