@@ -4,6 +4,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
+from src.api.v1 import login
 from src.core.config import settings
 from src.db.postgres import create_database
 
@@ -30,6 +31,8 @@ app = FastAPI(
         "email": "amazaingpythonteam@fake.com",
     },
 )
+
+app.include_router(login.router, prefix="/api/v1/login")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
