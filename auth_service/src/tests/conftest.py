@@ -45,7 +45,7 @@ async def make_get_request(client_session):
 
     async def inner(endpoint: str, params: dict | None = None) -> tuple[Any, Any]:
         params = params or {}
-        url = urljoin(test_settings.MOVIES_API_URL, endpoint)
+        url = urljoin(test_settings.AUTH_API_URL, endpoint)
         async with client_session.get(url, params=params) as raw_response:
             response = await raw_response.json()
             status = raw_response.status
