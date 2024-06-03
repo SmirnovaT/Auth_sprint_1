@@ -6,6 +6,7 @@ from fastapi.responses import ORJSONResponse
 
 from src.core.config import settings
 from src.db.postgres import create_database
+from src.api.v1 import user
 
 
 @asynccontextmanager
@@ -30,6 +31,9 @@ app = FastAPI(
         "email": "amazaingpythonteam@fake.com",
     },
 )
+
+app.include_router(user.router, prefix="/api/v1/user")
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
