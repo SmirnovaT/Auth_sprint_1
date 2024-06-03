@@ -55,6 +55,23 @@ class BaseRepository:
                 detail=f"Значение поля: '{field_name}' не уникально",
             )
 
+    async def update(self, item: Any) -> Any:
+        """Базовая функция по изменению сущности в БД"""
+
+        try:
+            await self.db.commit()
+            await self.db.refresh(item)
+            return item
+        except DatabaseError as db_err:
+            auth_logger.error(
+                f"Возникла ошибка в ходе запроса к БД на изменение: {db_err}",
+            )
+
+            raise HTTPException(
+                status_code=500,
+                detail=f"Возникла ошибка в ходе запроса к БД на изменение: {db_err}",
+            )
+
     async def delete(self, item: Any) -> None:
         """Базовая функция по удалению сущности из БД"""
 
