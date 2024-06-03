@@ -47,9 +47,10 @@ class User(Base, TimestampMixin):
     )
 
     def __init__(
-        self, login: str, password: str, first_name: str, last_name: str
+        self, login: str, email: str, password: str, first_name: str, last_name: str
     ) -> None:
         self.login = login
+        self.email = email
         self.password = self.password = generate_password_hash(password)
         self.first_name = first_name
         self.last_name = last_name

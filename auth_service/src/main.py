@@ -4,7 +4,6 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
-from src.api.v1 import login
 from src.core.config import settings
 from src.db.postgres import create_database
 
@@ -32,6 +31,8 @@ app = FastAPI(
     },
 )
 
+app.include_router(user.router, prefix="/api/v1/user")
+app.include_router(role.router, prefix="/api/v1/role")
 app.include_router(login.router, prefix="/api/v1/login")
 
 if __name__ == "__main__":
