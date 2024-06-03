@@ -1,15 +1,7 @@
-from fastapi import Depends, HTTPException
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import Depends
 
-from src.db.models import Role
-from src.db.postgres import get_session
-from src.repositories.base import BaseRepository
-from src.schemas.role import RoleRead
-
-PERMISSIONS = {
-    "can_perform_roles": ["admin"],
-}
+from src.repositories.role import RoleRepository
+from src.schemas.role import RoleGeneral
 
 
 class RoleService:
@@ -17,23 +9,20 @@ class RoleService:
 
     def __init__(
         self,
-        db: AsyncSession = Depends(get_session),
-        repository: BaseRepository = Depends(BaseRepository),
+        repository: RoleRepository = Depends(RoleRepository),
     ):
         self.repository = repository
-        self.db = db
 
-    async def create_role(self, role_name: str) -> RoleRead:
+    async def get_all_roles(self) -> list[RoleGeneral]:
+        """Получение всех ролей, заведенных в сервисе"""
+
+        all_roles = await self.repository.get_roles()
+
+        return all_roles
+
+    async def create_role(self, role_name: str) -> RoleGeneral:
         """Создание новой роли"""
 
-        role_already_exist = await self.db.scalar(
-            select(Role).where(Role.name == role_name)
-        )
-        if role_already_exist:
-            raise HTTPException(
-                status_code=409, detail=f"Роль с названием '{role_name}' уже существует"
-            )
+        created_role = await self.repository.create_role(role_name)
 
-        new_role = await self.repository.create(Role(name=role_name))
-
-        return new_role
+        return created_role
