@@ -31,3 +31,17 @@ class RoleRepository(BaseRepository):
         created_role = await self.create(Role(name=role_name))
 
         return created_role
+
+    async def remove_role(self, role_name: str) -> None:
+        """Удаление роли"""
+
+        role_to_delete = await self.db.scalar(
+            select(Role).where(self.model.name == role_name)
+        )
+        if not role_to_delete:
+            raise HTTPException(
+                status_code=409, detail=f"Роли с названием '{role_name}' не существует"
+            )
+
+        await self.delete(role_to_delete)
+

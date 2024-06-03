@@ -54,3 +54,19 @@ class BaseRepository:
                 status_code=400,
                 detail=f"Значение поля: '{field_name}' не уникально",
             )
+
+    async def delete(self, item: Any) -> None:
+        """Базовая функция по удалению сущности из БД"""
+
+        try:
+            await self.db.delete(item)
+            await self.db.commit()
+        except DatabaseError as db_err:
+            auth_logger.error(
+                f"Возникла ошибка в ходе запроса к БД на удаление: {db_err}",
+            )
+
+            raise HTTPException(
+                status_code=500,
+                detail=f"Возникла ошибка в ходе запроса к БД на удаление: {db_err}",
+            )

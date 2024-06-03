@@ -26,3 +26,8 @@ class RoleService:
         created_role = await self.repository.create_role(role_name)
 
         return created_role
+
+    async def remove_role(self, role_name: str) -> None:
+        """Удаление роли"""
+
+        await self.repository.remove_role(role_name)

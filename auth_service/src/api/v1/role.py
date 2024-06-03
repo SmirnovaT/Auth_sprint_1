@@ -43,3 +43,19 @@ async def role_creating(
     created_role = await roles_service.create_role(role_name)
 
     return created_role
+
+
+@router.delete(
+    "",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Удаление роли",
+    description="Удаление роли из сервиса",
+)
+async def role_removing(
+        request: Request,
+        role_name: str,
+        roles_service: RoleService = Depends(RoleService),
+) -> None:
+    await check_token_and_role(request, PERMISSIONS["can_read_and_perform_roles"])
+
+    await roles_service.remove_role(role_name)
