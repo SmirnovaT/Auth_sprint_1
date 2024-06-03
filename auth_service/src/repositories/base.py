@@ -1,7 +1,8 @@
 from typing import Any
 
 from fastapi import Depends, HTTPException
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import select
+from sqlalchemy.exc import DatabaseError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.logger import auth_logger
@@ -19,6 +20,21 @@ class BaseRepository:
         """Функция инициализирует репозиторий с сессией БД"""
 
         self.db = db
+
+    async def get(self, table: Any) -> list[Any]:
+        """Базовая функция по получению всех сущностей в БД"""
+
+        try:
+            return list(await self.db.scalars(select(table)))
+        except DatabaseError as db_err:
+            auth_logger.error(
+                f"Возникла ошибка в ходе запроса к таблице '{table}': {db_err}",
+            )
+
+            raise HTTPException(
+                status_code=500,
+                detail=f"Возникла ошибка в ходе запроса к таблице '{table}'",
+            )
 
     async def create(self, item: Any) -> Any:
         """Базовая функция по созданию сущности в БД"""
