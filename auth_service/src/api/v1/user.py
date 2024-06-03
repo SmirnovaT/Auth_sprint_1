@@ -6,8 +6,13 @@ from src.services.user import UserService
 router = APIRouter(tags=["user"])
 
 
-@router.post("/signup", response_model=UserInDB, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/signup",
+    response_model=UserInDB,
+    status_code=status.HTTP_201_CREATED,
+    summary="Регистрация пользователя",
+)
 async def create_user(
-        user_create: UserCreate, service: UserService = Depends(UserService)
+    user_create: UserCreate, service: UserService = Depends(UserService)
 ) -> UserInDB:
     return await service.register(user_create)

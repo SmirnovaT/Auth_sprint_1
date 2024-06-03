@@ -2,7 +2,6 @@ from fastapi import Depends
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
 
-
 from src.db.models import User
 from src.db.postgres import get_session
 from src.schemas.user import UserCreate, UserInDB
@@ -10,6 +9,8 @@ from src.repositories.user import UserRepository
 
 
 class UserService:
+    """Сервис для взаимодействия с моделью User"""
+
     def __init__(
         self,
         db: AsyncSession = Depends(get_session),
@@ -19,6 +20,8 @@ class UserService:
         self.db = db
 
     async def register(self, user_create: UserCreate) -> UserInDB:
+        """Регистрация пользователя"""
+
         user_dto = jsonable_encoder(user_create)
         user = User(**user_dto)
         return await self.repository.create_user(user)
