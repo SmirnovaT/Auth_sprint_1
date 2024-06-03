@@ -4,9 +4,9 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
+from src.api.v1 import role, user
 from src.core.config import settings
 from src.db.postgres import create_database
-from src.api.v1 import user
 
 
 @asynccontextmanager
@@ -33,6 +33,7 @@ app = FastAPI(
 )
 
 app.include_router(user.router, prefix="/api/v1/user")
+app.include_router(role.router, prefix="/api/v1/role")
 
 
 if __name__ == "__main__":

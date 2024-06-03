@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from typing import Tuple
 
 import jwt
+from fastapi import Request
 from fastapi.exceptions import HTTPException
 
 from src.core.config import settings
@@ -105,3 +106,13 @@ async def validate_token(token: str) -> dict[str, str]:
         raise HTTPException(status_code=500, detail="Error while JWT decoding")
 
     return decoded_token
+
+
+async def check_token_and_role(request: Request, roles: list) -> None:
+    access_token = request.cookies.get("access_token")
+    if not access_token:
+        raise HTTPException(status_code=401, detail="В cookies отсутствует access token")
+
+    decoded_token = await validate_token(access_token)
+    if decoded_token.get("user_role") not in roles:
+        raise HTTPException(status_code=403, detail="Нет прав для совершения действия")
