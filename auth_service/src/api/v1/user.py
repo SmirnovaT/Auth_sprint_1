@@ -40,7 +40,7 @@ async def change_role(
 @router.delete(
     "/{login}/roles/{role_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    summary="Удалить роль у пользователя",
+    summary="Удаление роли у пользователя",
 )
 async def remove_role_from_user(
     request: Request,
