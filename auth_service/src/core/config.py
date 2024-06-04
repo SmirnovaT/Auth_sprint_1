@@ -26,6 +26,11 @@ class Settings(BaseSettings):
     redis_user: str
     redis_password: str
 
+    admin_login: str
+    admin_email: str
+    admin_password: str
+    admin_role_name: str
+
     model_config = SettingsConfigDict(
         env_file=Path(__file__).resolve().parent.parent.parent / ".env",
         extra='ignore'

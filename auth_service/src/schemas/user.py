@@ -18,3 +18,10 @@ class UserInDB(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class UserInDBWRole(BaseModel):
+    id: UUID
+    first_name: str
+    last_name: str
+    role_id: UUID

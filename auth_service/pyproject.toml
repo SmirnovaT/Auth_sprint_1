@@ -20,6 +20,7 @@ gunicorn = "^22.0.0"
 alembic = "^1.13.1"
 cryptography = "^42.0.7"
 pyjwt = "^2.8.0"
+typer-cli = "^0.12.3"
 passlib = "^1.7.4"
 
 
