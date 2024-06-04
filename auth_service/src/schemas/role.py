@@ -1,10 +1,11 @@
 import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
+
+from src.schemas.model_config import BaseOrjsonModel
 
 
-class RoleGeneral(BaseModel):
+class RoleGeneral(BaseOrjsonModel):
     id: UUID
     name: str
     created_at: datetime.datetime

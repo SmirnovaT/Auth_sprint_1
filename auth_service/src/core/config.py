@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     redis_user: str
     redis_password: str
 
+    page_size: int = 10
+    page_number: int = 1
+
     model_config = SettingsConfigDict(
         env_file=Path(__file__).resolve().parent.parent.parent / ".env"
     )
