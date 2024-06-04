@@ -53,10 +53,10 @@ async def role_creating(
     description="Редактирование роли в сервисе",
 )
 async def role_updating(
-        request: Request,
-        role_id: str,
-        new_role_name: str,
-        roles_service: RoleService = Depends(RoleService),
+    request: Request,
+    role_id: str,
+    new_role_name: str,
+    roles_service: RoleService = Depends(RoleService),
 ) -> RoleGeneral:
     await check_token_and_role(request, PERMISSIONS["can_read_and_perform_roles"])
 
@@ -72,9 +72,9 @@ async def role_updating(
     description="Удаление роли из сервиса",
 )
 async def role_removing(
-        request: Request,
-        role_id: str,
-        roles_service: RoleService = Depends(RoleService),
+    request: Request,
+    role_id: str,
+    roles_service: RoleService = Depends(RoleService),
 ) -> None:
     await check_token_and_role(request, PERMISSIONS["can_read_and_perform_roles"])
 
