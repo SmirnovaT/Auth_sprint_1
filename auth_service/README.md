@@ -29,11 +29,19 @@ docker-compose up --build -d
 
 4. pip3 install poetry
 
-5. poetry install (or python -m poetry install)
+5. poetry install (or python3 -m poetry install)
 
 7. docker run -p 6379:6379 redis:7.2.4-alpine
  
-8. uvicorn src.main:app --reload --host 0.0.0.0 --port 8000 --workers 4
+8. uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
 
 9. alembic upgrade head
+```
+
+Создание пользователя с ролью 'admin' с помощью CLI
+
+```
+1. cd auth_service/src/commands
+
+2. python3 -m main_cli
 ```
