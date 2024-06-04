@@ -7,7 +7,7 @@ from src.core.config import settings
 from src.core.logger import auth_logger
 from src.db.models import User, Role
 
-ENGINE = create_engine(f"postgresql+psycopg2://{settings.db_dsn}")
+ENGINE = create_engine(f"postgresql://{settings.db_dsn}")
 
 
 def create_admin():

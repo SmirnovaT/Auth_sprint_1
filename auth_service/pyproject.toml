@@ -10,7 +10,6 @@ python = "^3.12"
 fastapi = {extras = ["all"], version = "^0.111.0"}
 sqlalchemy = {extras = ["asyncio"], version = "^2.0.30"}
 asyncpg = "^0.29.0"
-psycopg2-binary = "^2.9.9"
 pydantic-settings = "^2.2.1"
 werkzeug = "^3.0.3"
 uvicorn = "^0.30.0"
