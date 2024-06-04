@@ -6,6 +6,7 @@ from fastapi.responses import ORJSONResponse
 
 from src.core.config import settings
 from src.db.postgres import create_database
+from src.api.v1 import login, role, user
 
 
 @asynccontextmanager

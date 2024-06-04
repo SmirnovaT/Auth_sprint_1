@@ -1,11 +1,11 @@
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException
-from passlib.hash import pbkdf2_sha256
-
-from src.db.postgres import get_pass_hash
+from src.services.user import UserService
+from src.utils.jwt import create_access_and_refresh_tokens
 
 router = APIRouter(tags=["login"])
+
 
 @router.post(
     "/",
@@ -14,8 +14,8 @@ router = APIRouter(tags=["login"])
     description="Предоставление пользователю JWT токена при вводе корректных логина и пароля.",
 )
 async def login(
-    login: str, password: str):
-    hash = get_pass_hash(login)
-    if pbkdf2_sha256.verify(password, hash):
-        logging.warning("Password is correct")
-        pass
+    login: str, password: str, service: UserService = Depends(UserService)):
+    user = await service.get_user(login)
+    if user.check_password(password):
+        create_access_and_refresh_tokens(login, user.role)
+

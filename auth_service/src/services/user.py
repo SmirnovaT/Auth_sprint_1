@@ -25,3 +25,9 @@ class UserService:
         user_dto = jsonable_encoder(user_create)
         user = User(**user_dto)
         return await self.repository.create_user(user)
+
+    async def get_user(self, login):
+        """Получение всех ролей, заведенных в сервисе"""
+
+        user = await self.repository.get_user(login)
+        return user
