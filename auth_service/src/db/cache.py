@@ -6,7 +6,7 @@ from redis.asyncio import Redis
 
 from src.core.config import settings
 from src.core.logger import auth_logger
-from src.db.models.model_config import BaseOrjsonModel
+from src.schemas.model_config import BaseOrjsonModel
 from src.utils.orjson_dumps import orjson_dumps
 
 redis: Redis | None = None
