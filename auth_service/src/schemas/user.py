@@ -1,9 +1,9 @@
 from uuid import UUID
 
-from pydantic import BaseModel
+from src.schemas.model_config import BaseOrjsonModel
 
 
-class UserCreate(BaseModel):
+class UserCreate(BaseOrjsonModel):
     login: str
     email: str
     password: str
@@ -11,7 +11,7 @@ class UserCreate(BaseModel):
     last_name: str
 
 
-class UserInDB(BaseModel):
+class UserInDB(BaseOrjsonModel):
     id: UUID
     first_name: str
     last_name: str
@@ -20,7 +20,7 @@ class UserInDB(BaseModel):
         orm_mode = True
 
 
-class UserInDBWRole(BaseModel):
+class UserInDBWRole(BaseOrjsonModel):
     id: UUID
     first_name: str
     last_name: str
