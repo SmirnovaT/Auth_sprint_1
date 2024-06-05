@@ -64,8 +64,10 @@ class UserRepository(BaseRepository):
 
         return await self.get(self.model)
 
-    async def get_user_by_login(self, login: str) -> UserInDB:
+    async def get_user(self, login: str) -> UserInDB:
         """Получение пользователя по логину"""
 
-        users =  await self.get(self.model)
-        return users[0]
+        user = await self.db.scalar(
+            select(User).where(self.model.login == login)
+        )
+        return user

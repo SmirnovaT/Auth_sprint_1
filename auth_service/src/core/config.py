@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     redis_port: int
     redis_user: str
     redis_password: str
+    cache_expire_in_seconds: int
 
     admin_login: str
     admin_email: str
