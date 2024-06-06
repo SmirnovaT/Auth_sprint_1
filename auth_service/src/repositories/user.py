@@ -59,11 +59,6 @@ class UserRepository(BaseRepository):
         user_to_role_delete.role_id = None
         await self.update(user_to_role_delete)
 
-    async def get_users(self) -> UserInDB:
-        """Получение всех пользователей"""
-
-        return await self.get(self.model)
-
     async def get_user(self, login: str) -> UserInDB:
         """Получение пользователя по логину"""
 
