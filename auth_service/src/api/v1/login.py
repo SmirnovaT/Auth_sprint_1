@@ -1,9 +1,10 @@
 import logging
 from http import HTTPStatus
 
-from src.db.cache import get_redis, AsyncCacheService
 from fastapi import APIRouter, Depends, Response, HTTPException
 from pydantic import BaseModel
+
+from src.db.cache import get_redis, AsyncCacheService
 from src.services.user import UserService
 from src.utils.jwt import create_access_and_refresh_tokens
 
