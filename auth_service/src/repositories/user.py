@@ -58,3 +58,11 @@ class UserRepository(BaseRepository):
 
         user_to_role_delete.role_id = None
         await self.update(user_to_role_delete)
+
+    async def get_user(self, login: str) -> UserInDB:
+        """Получение пользователя по логину"""
+
+        user = await self.db.scalar(
+            select(User).where(self.model.login == login)
+        )
+        return user

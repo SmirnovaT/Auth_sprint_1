@@ -35,3 +35,9 @@ class UserService:
         """Удаление роли у пользователя"""
 
         return await self.repository.remove_user_role(login, role_id)
+
+    async def get_user(self, login):
+         """Получение пользователя по логину"""
+
+        user = await self.repository.get_user(login)
+        return user
