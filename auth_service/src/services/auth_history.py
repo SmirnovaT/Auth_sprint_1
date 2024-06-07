@@ -24,3 +24,10 @@ class AuthHistoryService:
         """Получение истории аутентификаций"""
 
         return await self.repository.get_history(user_id, page_size, page_number)
+
+    async def set_history(
+            self,
+            user_id: UUID,
+            user_agent: str,
+            success: bool):
+        return await self.repository.set_history(user_id, user_agent, success)
