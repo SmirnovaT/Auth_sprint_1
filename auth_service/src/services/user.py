@@ -4,12 +4,15 @@ from fastapi import Depends, Response, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import JSONResponse
+from werkzeug.security import generate_password_hash
 
+from src.core.config import settings
 from src.core.logger import auth_logger
 from src.db.cache import AsyncCacheService
 from src.db.models import User
 from src.db.postgres import get_session
-from src.schemas.user import UserCreate, UserInDB, UserInDBWRole, Login
+from src.repositories.role import RoleRepository
+from src.schemas.user import UserCreate, UserInDB, UserInDBWRole, Login, ChangePassword
 from src.repositories.user import UserRepository
 from src.utils.jwt import validate_token, create_access_and_refresh_tokens
 
@@ -22,16 +25,20 @@ class UserService:
         db: AsyncSession = Depends(get_session),
         repository: UserRepository = Depends(),
         cache: AsyncCacheService = Depends(AsyncCacheService),
+        role_repository: RoleRepository = Depends(RoleRepository),
     ):
         self.repository = repository
         self.db = db
         self.cache = cache
+        self.role_repository = role_repository
 
     async def register(self, user_create: UserCreate) -> UserInDB:
         """Регистрация пользователя"""
 
         user_dto = jsonable_encoder(user_create)
         user = User(**user_dto)
+        role_id = await self.role_repository.role_id_by_name(settings.default_user_role)
+        user.role_id = role_id
         return await self.repository.create_user(user)
 
     async def change_user_role(self, login: str, role_id: str) -> UserInDBWRole:
@@ -60,31 +67,54 @@ class UserService:
                 detail="У пользователя не совпадает рефреш токен из редиса и из cookies",
             )
 
-        encoded_access_token, encoded_refresh_token = (
-            await create_access_and_refresh_tokens(user_login, user_role)
-        )
-
-        response.set_cookie("refresh_token", encoded_refresh_token)
-        response.set_cookie("access_token", encoded_access_token)
-
-        await self.cache.create_or_update_record(user_login, encoded_refresh_token)
+        await self.update_all_token(user_login, user_role)
 
         return JSONResponse(content={"message": "Токен обновлен"})
 
-    async def login(self, response, data):
+    async def login(self, response: Response, data: dict):
         """Аутентификация пользователя"""
 
         user = jsonable_encoder(data)
         user = Login(**user)
+        user_db = await self.repository.check_login(user.user_login, user.password)
+        role = await self.repository.role_name_by_id(user_db.role_id)
 
-        await self.repository.check_login(user.user_login, user.password)
+        await self.update_all_token(user.user_login, role, response)
 
-        access_token, refresh_token = await create_access_and_refresh_tokens(
+    async def change_password(
+        self, response: Response, password_data: dict
+    ) -> JSONResponse:
+        """Смена пароля пользователем"""
+
+        user = jsonable_encoder(password_data)
+        user = ChangePassword(**user)
+
+        user_to_update = await self.repository.check_login(
             user.user_login, user.password
         )
-        auth_logger.info(f"Successfully login")
+
+        role = await self.repository.role_name_by_id(user_to_update.role_id)
+
+        user_to_update.password = generate_password_hash(user.new_password)
+
+        await self.repository.update(user_to_update)
+
+        await self.update_all_token(user.user_login, role, response)
+
+        auth_logger.info("Пароль успешно обновлен")
+
+        return JSONResponse(content={"message": "Пароль успешно обновлен"})
+
+    async def update_all_token(self, user_login: str, role: str, response: Response):
+        """Обновление токенов"""
+
+        access_token, refresh_token = await create_access_and_refresh_tokens(
+            user_login, role
+        )
 
         response.set_cookie("access_token", access_token)
         response.set_cookie("refresh_token", refresh_token)
 
-        await self.cache.create_or_update_record(user.user_login, refresh_token)
+        await self.cache.create_or_update_record(user_login, refresh_token)
+
+        auth_logger.info("Токены обновлены")
