@@ -1,11 +1,17 @@
-from fastapi import Depends
+from http import HTTPStatus
+
+from fastapi import Depends, Response, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.responses import JSONResponse
 
+from src.db.cache import AsyncCacheService
 from src.db.models import User
 from src.db.postgres import get_session
+from src.repositories.role import RoleRepository
 from src.schemas.user import UserCreate, UserInDB, UserInDBWRole
 from src.repositories.user import UserRepository
+from src.utils.jwt import validate_token, create_access_and_refresh_tokens
 
 
 class UserService:
@@ -15,9 +21,11 @@ class UserService:
         self,
         db: AsyncSession = Depends(get_session),
         repository: UserRepository = Depends(),
+        cache: AsyncCacheService = Depends(AsyncCacheService),
     ):
         self.repository = repository
         self.db = db
+        self.cache = cache
 
     async def register(self, user_create: UserCreate) -> UserInDB:
         """Регистрация пользователя"""
@@ -40,3 +48,30 @@ class UserService:
         """Получение пользователя по логину"""
         user = await self.repository.get_user(login)
         return user
+
+    async def refresh_token(
+        self, refresh_token: str, response: Response
+    ) -> JSONResponse:
+        """Обновление токенов по рефреш токену"""
+
+        decoded_refresh_token = await validate_token(refresh_token)
+
+        user_login = decoded_refresh_token.get("user_login")
+        user_role = await self.repository.get_role_by_login(user_login)
+
+        if await self.cache.get_data_by_key(user_login) != refresh_token:
+            raise HTTPException(
+                status_code=HTTPStatus.UNAUTHORIZED,
+                detail="У пользователя не совпадает рефреш токен из редиса и из cookies",
+            )
+
+        encoded_access_token, encoded_refresh_token = (
+            await create_access_and_refresh_tokens(user_login, user_role)
+        )
+
+        response.set_cookie("refresh_token", encoded_refresh_token)
+        response.set_cookie("access_token", encoded_access_token)
+
+        await self.cache.create_or_update_record(user_login, encoded_refresh_token)
+
+        return JSONResponse(content={"message": "Токен обновлен"})

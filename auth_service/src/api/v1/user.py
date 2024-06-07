@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, Request, status
+from http import HTTPStatus
+
+from fastapi import APIRouter, Depends, Request, status, Response, HTTPException
 
 from src.constants.permissions import PERMISSIONS
 from src.schemas.user import UserCreate, UserInDB, UserInDBWRole
@@ -51,3 +53,21 @@ async def remove_role_from_user(
     await check_token_and_role(request, PERMISSIONS["can_read_and_perform_roles"])
 
     await service.remove_user_role(login, role_id)
+
+
+@router.post(
+    "/refresh",
+    status_code=status.HTTP_200_OK,
+    summary="Обновление токенов по рефреш токену",
+)
+async def refresh_token(
+    request: Request, response: Response, service: UserService = Depends(UserService)
+):
+    refresh_token = request.cookies.get("refresh_token")
+    if not refresh_token:
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED,
+            detail="Пользователь не авторизован, нет рефреш токена в cookies",
+        )
+
+    return await service.refresh_token(refresh_token, response)
