@@ -46,7 +46,7 @@ async def role_creating(
 
 
 @router.patch(
-    "/{role_id}",
+    "/{old_role_name}",
     response_model=RoleGeneral,
     status_code=status.HTTP_200_OK,
     summary="Редактирование роли",
@@ -54,13 +54,13 @@ async def role_creating(
 )
 async def role_updating(
     request: Request,
-    role_id: str,
+    old_role_name: str,
     new_role_name: str,
     roles_service: RoleService = Depends(RoleService),
 ) -> RoleGeneral:
     await check_token_and_role(request, PERMISSIONS["can_read_and_perform_roles"])
 
-    updated_role = await roles_service.update_role(role_id, new_role_name)
+    updated_role = await roles_service.update_role(old_role_name, new_role_name)
 
     return updated_role
 
@@ -73,9 +73,9 @@ async def role_updating(
 )
 async def role_removing(
     request: Request,
-    role_id: str,
+    role_name: str,
     roles_service: RoleService = Depends(RoleService),
 ) -> None:
     await check_token_and_role(request, PERMISSIONS["can_read_and_perform_roles"])
 
-    await roles_service.remove_role(role_id)
+    await roles_service.remove_role(role_name)

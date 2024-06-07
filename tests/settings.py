@@ -16,12 +16,20 @@ class PostgresSettings(BaseSettings):
 
     postgres_host: str = "127.0.0.1"
     postgres_port: int = 5432
+    postgres_user: str
+    postgres_db: str
+    postgres_password: str
 
 
 class TestSettings(BaseSettings):
     """Конфигурация проекта для тестирования"""
 
-    auth_api_url: str = "http://127.0.0.1:8010"
+    auth_api_url: str = "http://127.0.0.1:8000"
+
+    auth_algorithm: str
+    public_key: str
+    private_key: str
+
     redis: RedisSettings = RedisSettings()
     postgres: PostgresSettings = PostgresSettings()
 
