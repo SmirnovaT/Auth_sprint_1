@@ -1,15 +1,15 @@
 services:
   base:
     build:
-      context: ../../../auth_service
+      context: ../auth_service
       dockerfile: Dockerfile
       target: builder
     image: fastapi-image
 
   auth-service:
-    build: ../../../auth_service
+    build: ../auth_service
     env_file:
-      - ../../../auth_service/.env
+      - ../auth_service/.env
     restart: always
     depends_on:
       users_db:
@@ -43,7 +43,7 @@ services:
     restart: always
     container_name: users_db
     env_file:
-      - ../../../auth_service/.env
+      - ../auth_service/.env
     networks:
       - testnetwork
     volumes:
@@ -57,9 +57,9 @@ services:
   cache:
     image: redis:7.2.4-alpine
     env_file:
-      - ../../../auth_service/.env
+      - ../auth_service/.env
     volumes:
-     - ../../../auth_service/redis-data:/var/lib/redis
+     - ../auth_service/redis-data:/var/lib/redis
     networks:
       - testnetwork
 
