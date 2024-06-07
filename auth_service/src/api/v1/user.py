@@ -51,3 +51,13 @@ async def remove_role_from_user(
     await check_token_and_role(request, PERMISSIONS["can_read_and_perform_roles"])
 
     await service.remove_user_role(login, role_id)
+
+
+@router.post(
+    "/refresh",
+    status_code=status.HTTP_200_OK,
+    summary="Обновление токенов по рефреш токену",
+)
+async def refresh_token(request: Request, service: UserService = Depends(UserService)):
+
+    return await service.refresh_token(request)

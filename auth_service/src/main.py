@@ -3,19 +3,20 @@ from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+from redis.asyncio import Redis
 
 from src.api.v1 import role, user, auth_history
 from src.core.config import settings
-from src.db.postgres import create_database
+from src.db import cache
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Импорт моделей необходим для их автоматического создания
-    import src.db.models
-
-    await create_database()
+    cache.redis = Redis(
+        host=settings.redis_host, port=settings.redis_port, db=0, decode_responses=True
+    )
     yield
+    await cache.redis.close()
 
 
 app = FastAPI(
@@ -30,12 +31,12 @@ app = FastAPI(
         "name": "Amazing python team",
         "email": "amazaingpythonteam@fake.com",
     },
+    lifespan=lifespan,
 )
 
 app.include_router(user.router, prefix="/api/v1/user")
 app.include_router(role.router, prefix="/api/v1/role")
 app.include_router(auth_history.router, prefix="/api/v1/auth-history")
-
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
