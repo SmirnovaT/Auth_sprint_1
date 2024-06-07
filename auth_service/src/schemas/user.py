@@ -25,3 +25,8 @@ class UserInDBWRole(BaseOrjsonModel):
     first_name: str
     last_name: str
     role_id: UUID
+
+
+class Login(BaseOrjsonModel):
+    user_login: str
+    password: str

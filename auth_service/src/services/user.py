@@ -5,10 +5,11 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import JSONResponse
 
+from src.core.logger import auth_logger
 from src.db.cache import AsyncCacheService
 from src.db.models import User
 from src.db.postgres import get_session
-from src.schemas.user import UserCreate, UserInDB, UserInDBWRole
+from src.schemas.user import UserCreate, UserInDB, UserInDBWRole, Login
 from src.repositories.user import UserRepository
 from src.utils.jwt import validate_token, create_access_and_refresh_tokens
 
@@ -43,11 +44,6 @@ class UserService:
 
         return await self.repository.remove_user_role(login, role_id)
 
-    async def get_user(self, login):
-        """Получение пользователя по логину"""
-        user = await self.repository.get_user(login)
-        return user
-
     async def refresh_token(
         self, refresh_token: str, response: Response
     ) -> JSONResponse:
@@ -74,3 +70,21 @@ class UserService:
         await self.cache.create_or_update_record(user_login, encoded_refresh_token)
 
         return JSONResponse(content={"message": "Токен обновлен"})
+
+    async def login(self, response, data):
+        """Аутентификация пользователя"""
+
+        user = jsonable_encoder(data)
+        user = Login(**user)
+
+        await self.repository.check_login(user.user_login, user.password)
+
+        access_token, refresh_token = await create_access_and_refresh_tokens(
+            user.user_login, user.password
+        )
+        auth_logger.info(f"Successfully login")
+
+        response.set_cookie("access_token", access_token)
+        response.set_cookie("refresh_token", refresh_token)
+
+        await self.cache.create_or_update_record(user.user_login, refresh_token)

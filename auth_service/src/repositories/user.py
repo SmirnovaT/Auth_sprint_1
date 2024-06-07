@@ -79,3 +79,14 @@ class UserRepository(BaseRepository):
         user = result.scalars().first()
 
         return user.role.name if user else None
+
+    async def check_login(self, login, password) -> bool:
+        """Проверка логина и пароля пользователя"""
+
+        query = select(self.model).where(self.model.login == login)
+        result = await self.db.execute(query)
+        user = result.scalar()
+
+        if not (user and user.check_password(password)):
+            raise HTTPException(status_code=401, detail=f"Неверный логин или пароль")
+        return True
