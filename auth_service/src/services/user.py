@@ -8,7 +8,6 @@ from starlette.responses import JSONResponse
 from src.db.cache import AsyncCacheService
 from src.db.models import User
 from src.db.postgres import get_session
-from src.repositories.role import RoleRepository
 from src.schemas.user import UserCreate, UserInDB, UserInDBWRole
 from src.repositories.user import UserRepository
 from src.utils.jwt import validate_token, create_access_and_refresh_tokens
