@@ -18,12 +18,13 @@ async def wait_for_ok(service_url):
             time.sleep(10)
             try:
                 status = await get_status(service_url, client)
+                if status == 200:
+                    break
             except Exception as e:
                 logging.error(e)
-            if status == 200:
-                break
 
 
-service_url = "http://auth-service:8010/"
+
+service_url = "http://auth-service:8010/api/v1/healthcheck"
 loop = asyncio.new_event_loop()
 loop.run_until_complete(wait_for_ok(service_url))
