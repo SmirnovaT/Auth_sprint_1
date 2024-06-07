@@ -4,7 +4,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
-from src.api.v1 import role, login, user, auth_history
+from src.api.v1 import role, login, user, auth_history, healthcheck
 from src.core.config import settings
 from src.db.postgres import create_database
 
@@ -36,6 +36,7 @@ app.include_router(user.router, prefix="/api/v1/user")
 app.include_router(role.router, prefix="/api/v1/role")
 app.include_router(login.router, prefix="/api/v1/login")
 app.include_router(auth_history.router, prefix="/api/v1/auth-history")
+app.include_router(healthcheck.router, prefix="/api/v1/healthcheck")
 
 
 if __name__ == "__main__":
