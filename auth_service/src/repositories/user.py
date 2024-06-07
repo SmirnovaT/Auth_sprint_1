@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 from sqlalchemy import select
+from sqlalchemy.orm import joinedload
 
 from src.db import models
 from src.db.models import Role, User
@@ -62,7 +63,19 @@ class UserRepository(BaseRepository):
     async def get_user(self, login: str) -> UserInDB:
         """Получение пользователя по логину"""
 
-        user = await self.db.scalar(
-            select(User).where(self.model.login == login)
-        )
+        user = await self.db.scalar(select(User).where(self.model.login == login))
         return user
+
+    async def get_role_by_login(self, login: str) -> str:
+        """Получение роли пользователя по логину"""
+
+        query = (
+            select(self.model)
+            .options(joinedload(self.model.role))
+            .where(self.model.login == login)
+        )
+
+        result = await self.db.execute(query)
+        user = result.scalars().first()
+
+        return user.role.name if user else None

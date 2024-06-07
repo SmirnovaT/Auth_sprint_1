@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     redis_port: int
     redis_user: str
     redis_password: str
-    cache_expire_in_seconds: int
+    cache_expire_in_seconds: int = 864000
 
     admin_login: str
     admin_email: str
@@ -36,8 +36,7 @@ class Settings(BaseSettings):
     page_number: int = 1
 
     model_config = SettingsConfigDict(
-        env_file=Path(__file__).resolve().parent.parent.parent / ".env",
-        extra='ignore'
+        env_file=Path(__file__).resolve().parent.parent.parent / ".env", extra="ignore"
     )
 
 
