@@ -122,3 +122,10 @@ class UserService:
         await self.cache.create_or_update_record(user_login, refresh_token)
 
         auth_logger.info("Токены обновлены")
+
+
+    async def logout(self, login, refresh_token: str, response: Response):
+        await self.cache.delete_record(login)
+        await self.cache.create_or_update_record("black_list", refresh_token)
+        response.delete_cookie("access_token")
+        response.delete_cookie("refresh_token")
