@@ -1,7 +1,7 @@
 registration_data = {
-    "login": "Testdh",
-    "email": "test.user@example.comdh",
-    "password": "passworddh",
+    "login": "Test",
+    "email": "test.user@example.com",
+    "password": "password",
     "first_name": "Test",
     "last_name": "Test"
 }

@@ -15,7 +15,7 @@ class PostgresSettings(BaseSettings):
     """Конфигурация для Postgres"""
 
     postgres_host: str = "127.0.0.1"
-    postgres_port: int = 5433
+    postgres_port: int = 5432
     postgres_user: str
     postgres_db: str
     postgres_password: str
