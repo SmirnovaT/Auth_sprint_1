@@ -46,6 +46,10 @@ class BaseAsyncCacheService(ABC):
     async def get_data_by_key(self, key):
         pass
 
+    @abstractmethod
+    async def delete_record(self, key):
+        pass
+
 
 class AsyncCacheService(BaseAsyncCacheService):
     """Имплементация класса для кеширования данных"""
@@ -138,3 +142,9 @@ class AsyncCacheService(BaseAsyncCacheService):
             )
         except Exception as exc:
             auth_logger.error(f"Ошибка при записи по ключу {key} в кеш: {exc}")
+
+    async def delete_record(self, key: str):
+        try:
+            await self.cache.delete(key)
+        except Exception as exc:
+            auth_logger.error(f"Ошибка при удалении записи по ключу {key}")

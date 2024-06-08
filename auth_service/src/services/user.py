@@ -118,3 +118,11 @@ class UserService:
         await self.cache.create_or_update_record(user_login, refresh_token)
 
         auth_logger.info("Токены обновлены")
+
+
+    async def logout(self, login, refresh_token: str, response: Responce):
+        await self.cache.delete(login)
+        await self.cache.create_or_update_record("balck_list", refresh_token)
+        response.delete_cookie("access_token")
+        response.delete_cokie("refresh_token")
+        return response
