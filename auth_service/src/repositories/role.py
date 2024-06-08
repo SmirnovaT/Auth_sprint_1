@@ -27,22 +27,22 @@ class RoleRepository(BaseRepository):
         )
         if role_already_exist:
             raise HTTPException(
-                status_code=404, detail=f"Роль с названием '{role_name}' уже существует"
+                status_code=400, detail=f"Роль с названием '{role_name}' уже существует"
             )
 
         created_role = await self.create(Role(name=role_name))
 
         return created_role
 
-    async def update_role(self, role_id: str, new_role_name: str) -> RoleGeneral:
+    async def update_role(self, old_role_name: str, new_role_name: str) -> RoleGeneral:
         """Редактирование роли"""
 
         role_to_update = await self.db.scalar(
-            select(Role).where(self.model.id == role_id)
+            select(Role).where(self.model.name == old_role_name)
         )
         if not role_to_update:
             raise HTTPException(
-                status_code=404, detail=f"Роли с id '{role_id}' не существует"
+                status_code=404, detail=f"Роли с name '{old_role_name}' не существует"
             )
 
         role_to_update.name = new_role_name
@@ -50,15 +50,15 @@ class RoleRepository(BaseRepository):
 
         return updated_role
 
-    async def remove_role(self, role_id: str) -> None:
+    async def remove_role(self, role_name: str) -> None:
         """Удаление роли"""
 
         role_to_delete = await self.db.scalar(
-            select(Role).where(self.model.id == role_id)
+            select(Role).where(self.model.name == role_name)
         )
         if not role_to_delete:
             raise HTTPException(
-                status_code=404, detail=f"Роли с id '{role_id}' не существует"
+                status_code=404, detail=f"Роли с name '{role_name}' не существует"
             )
 
         await self.delete(role_to_delete)

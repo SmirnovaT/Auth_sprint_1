@@ -1,3 +1,26 @@
+### AUTH SERVICE
+
+### AUTH SERVICE для онлайн-кинотеатра
+
+Тестирование приложения локально:
+```
+1. Use test database! Change DB_DSN. 
+
+2. cd auth_service
+
+3. alembic upgrade head
+
+4. cd tests/
+
+5. cp .env_example .env
+
+6. poetry install (or python3 -m poetry install)
+
+7. pytest (python3 -m pytest) 
+   or 
+   pytest -k <test_name> (python3 -m pytest -k <test_name>)
+```
+
 # Проектная работа 6 спринта
 
 С этого модуля вы больше не будете получать чётко расписанное ТЗ, а задания для каждого спринта вы найдёте внутри уроков. Перед тем как начать программировать, вам предстоит продумать архитектуру решения, декомпозировать задачи и распределить их между командой.
