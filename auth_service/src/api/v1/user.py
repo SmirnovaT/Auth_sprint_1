@@ -3,7 +3,7 @@ from http import HTTPStatus
 from fastapi import APIRouter, Depends, Request, status, Response, HTTPException
 
 from src.constants.permissions import PERMISSIONS
-from src.schemas.user import UserCreate, UserInDB, UserInDBWRole, ChangePassword, Login
+from src.schemas.user import UserCreate, UserInDB, UserInDBWRole, Login
 from src.services.user import UserService
 from src.utils.jwt import check_token_and_role, validate_token
 
