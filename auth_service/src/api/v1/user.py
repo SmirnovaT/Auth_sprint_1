@@ -87,10 +87,10 @@ async def change_password(
 
 @router.get(
     "/logout",
-    status_code=status.HTTP_200_OK,
+    status_code=HTTPStatus.OK,
     summary="Выход пользователя",
 )
 async def logout(login, request: Request, response: Response, service: UserService = Depends(UserService)):
-    await check_token_and_role(request, PERMISSIONS["can_read"])
     refresh_token = request.cookies.get("refresh_token")
+    await validate_token(refresh_token)
     return await service.logout(login, refresh_token, response)
