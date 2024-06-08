@@ -30,9 +30,3 @@ class UserInDBWRole(BaseOrjsonModel):
 class Login(BaseOrjsonModel):
     user_login: str
     password: str
-
-
-class ChangePassword(BaseOrjsonModel):
-    user_login: str
-    password: str
-    new_password: str

@@ -12,7 +12,7 @@ from src.db.cache import AsyncCacheService
 from src.db.models import User
 from src.db.postgres import get_session
 from src.repositories.role import RoleRepository
-from src.schemas.user import UserCreate, UserInDB, UserInDBWRole, Login, ChangePassword
+from src.schemas.user import UserCreate, UserInDB, UserInDBWRole, Login
 from src.repositories.user import UserRepository
 from src.utils.jwt import validate_token, create_access_and_refresh_tokens
 
@@ -82,30 +82,34 @@ class UserService:
         await self.update_all_token(user.user_login, role, response)
 
     async def change_password(
-        self, response: Response, password_data: dict
+        self, response: Response, password_data: dict, new_login: str, new_password: str
     ) -> JSONResponse:
         """Смена пароля пользователем"""
 
         user = jsonable_encoder(password_data)
-        user = ChangePassword(**user)
+        user = Login(**user)
 
         user_to_update = await self.repository.check_login(
             user.user_login, user.password
         )
-
-        role = await self.repository.role_name_by_id(user_to_update.role_id)
-
-        user_to_update.password = generate_password_hash(user.new_password)
+        if new_password:
+            user_to_update.password = generate_password_hash(new_password)
+        if new_login:
+            user_to_update.login = new_login
 
         await self.repository.update(user_to_update)
 
-        await self.update_all_token(user.user_login, role, response)
+        role = await self.repository.role_name_by_id(user_to_update.role_id)
 
-        auth_logger.info("Пароль успешно обновлен")
+        await self.update_all_token(user_to_update.login, role, response)
 
-        return JSONResponse(content={"message": "Пароль успешно обновлен"})
+        auth_logger.info("Пароль и логин успешно обновлены")
 
-    async def update_all_token(self, user_login: str, role: str, response: Response):
+        return JSONResponse(content={"message": "Пароль и логин успешно обновлены"})
+
+    async def update_all_token(
+        self, user_login: str, role: str, response: Response
+    ) -> None:
         """Обновление токенов"""
 
         access_token, refresh_token = await create_access_and_refresh_tokens(
