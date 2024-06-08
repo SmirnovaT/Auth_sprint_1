@@ -32,6 +32,8 @@ class Settings(BaseSettings):
     admin_password: str
     admin_role_name: str
 
+    default_user_role: str
+
     page_size: int = 10
     page_number: int = 1
 

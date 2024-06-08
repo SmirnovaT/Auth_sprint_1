@@ -3,7 +3,7 @@ from http import HTTPStatus
 from fastapi import APIRouter, Depends, Request, status, Response, HTTPException
 
 from src.constants.permissions import PERMISSIONS
-from src.schemas.user import UserCreate, UserInDB, UserInDBWRole
+from src.schemas.user import UserCreate, UserInDB, UserInDBWRole, ChangePassword
 from src.services.user import UserService
 from src.utils.jwt import check_token_and_role
 
@@ -71,3 +71,16 @@ async def refresh_token(
         )
 
     return await service.refresh_token(refresh_token, response)
+
+
+@router.patch(
+    "/change-password",
+    status_code=status.HTTP_200_OK,
+    summary="Смена пароля пользователем",
+)
+async def change_password(
+    response: Response,
+    password_data: ChangePassword,
+    service: UserService = Depends(UserService),
+):
+    return await service.change_password(response, password_data)

@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import HTTPException
 from sqlalchemy import select
 
@@ -60,3 +62,13 @@ class RoleRepository(BaseRepository):
             )
 
         await self.delete(role_to_delete)
+
+    async def role_id_by_name(self, role: str) -> UUID:
+        """Получение id роли по названию роли"""
+
+        query = select(self.model.id).where(self.model.name == role)
+
+        result = await self.db.execute(query)
+        role_id = result.scalars().first()
+
+        return role_id

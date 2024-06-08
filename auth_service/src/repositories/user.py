@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
@@ -80,7 +82,7 @@ class UserRepository(BaseRepository):
 
         return user.role.name if user else None
 
-    async def check_login(self, login, password) -> bool:
+    async def check_login(self, login: str, password: str) -> bool:
         """Проверка логина и пароля пользователя"""
 
         query = select(self.model).where(self.model.login == login)
@@ -89,4 +91,18 @@ class UserRepository(BaseRepository):
 
         if not (user and user.check_password(password)):
             raise HTTPException(status_code=401, detail=f"Неверный логин или пароль")
-        return True
+        return user
+
+    async def role_name_by_id(self, role_id: UUID) -> str:
+        """Получение названия роли по id роли"""
+
+        query = (
+            select(self.model)
+            .options(joinedload(self.model.role))
+            .where(self.model.role_id == role_id)
+        )
+
+        result = await self.db.execute(query)
+        user = result.scalars().first()
+
+        return user.role.name if user else None
