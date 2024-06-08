@@ -1,10 +1,12 @@
 from http import HTTPStatus
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Header, Response
 
 
 from src.schemas.user import Login
 from src.services.user import UserService
+from src.services.auth_history import AuthHistoryService
 
 router = APIRouter(tags=["login"])
 
@@ -19,5 +21,13 @@ async def login(
     data: Login,
     response: Response,
     service: UserService = Depends(UserService),
+    user_agent: Annotated[str | None, Header()] = None,
+    history_service: AuthHistoryService = Depends(AuthHistoryService)
 ):
-    return await service.login(response, data)
+    try:
+        res = await service.login(response, data)
+        await history_service.set_history(user_id=user.id, user_agent=user_agent, success=True)
+        return res
+    except:
+        await history_service.set_history(user_id=user.id, user_agent=user_agent, success=False)
+        raise

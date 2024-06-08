@@ -1,9 +1,9 @@
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import select, insert
 from sqlalchemy.orm import joinedload
 
 from src.db import models
-from src.db.models import Role, User
+from src.db.models import Role, User, AuthenticationHistory
 from src.repositories.base import BaseRepository
 from src.schemas.user import UserInDB, UserInDBWRole
 
@@ -88,5 +88,9 @@ class UserRepository(BaseRepository):
         user = result.scalar()
 
         if not (user and user.check_password(password)):
+            query = (
+                insert(self.model).values(id=user_id, success=success, user_agent=user_agent, created_at=datetime.now())
+            )
+
             raise HTTPException(status_code=401, detail=f"Неверный логин или пароль")
         return True

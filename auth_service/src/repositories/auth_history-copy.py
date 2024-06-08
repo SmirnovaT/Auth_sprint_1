@@ -1,6 +1,7 @@
+from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, insert
 
 from src.db import models
 from src.repositories.base import BaseRepository
@@ -29,6 +30,7 @@ class AuthHistoryRepository(BaseRepository):
         result = await self.db.execute(query)
 
         return result.scalars().all()
+
     async def set_history(
             self,
             user_id: UUID,
