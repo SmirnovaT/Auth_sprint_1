@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Request, status, Response, HTTPException
 from src.constants.permissions import PERMISSIONS
 from src.schemas.user import UserCreate, UserInDB, UserInDBWRole, Login
 from src.services.user import UserService
-from src.utils.jwt import check_token_and_role
+from src.utils.jwt import check_token_and_role, validate_token
 
 router = APIRouter(tags=["user"])
 
@@ -88,3 +88,13 @@ async def change_password(
     return await service.change_password(
         response, password_data, new_login, new_password
     )
+
+@router.get(
+    "/logout",
+    status_code=HTTPStatus.OK,
+    summary="Выход пользователя",
+)
+async def logout(login, request: Request, response: Response, service: UserService = Depends(UserService)):
+    refresh_token = request.cookies.get("refresh_token")
+    await validate_token(refresh_token)
+    return await service.logout(login, refresh_token, response)
