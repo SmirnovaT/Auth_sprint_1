@@ -3,7 +3,7 @@ from sqlalchemy import select, insert
 from sqlalchemy.orm import joinedload
 
 from src.db import models
-from src.db.models import Role, User, AuthenticationHistory
+from src.db.models import Role, User
 from src.repositories.base import BaseRepository
 from src.schemas.user import UserInDB, UserInDBWRole
 

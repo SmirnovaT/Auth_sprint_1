@@ -26,8 +26,8 @@ async def login(
 ):
     try:
         res = await service.login(response, data)
-        await history_service.set_history(user_id=user.id, user_agent=user_agent, success=True)
+        await history_service.set_history(login=data.user_login, user_agent=user_agent, success=True)
         return res
     except:
-        await history_service.set_history(user_id=user.id, user_agent=user_agent, success=False)
+        await history_service.set_history(login=data.user_login, user_agent=user_agent, success=False)
         raise

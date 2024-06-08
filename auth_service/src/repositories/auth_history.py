@@ -1,6 +1,7 @@
+from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, insert
 
 from src.db import models
 from src.repositories.base import BaseRepository
@@ -31,12 +32,19 @@ class AuthHistoryRepository(BaseRepository):
         return result.scalars().all()
     async def set_history(
             self,
-            user_id: UUID,
+            login: str,
             user_agent: str,
             success: bool):
         query = (
-            insert(self.model).values(id=user_id, success=success, user_agent=user_agent, created_at=datetime.now())
+            select(models.User)
+            .where(models.User.login == login)
         )
-        result = await self.db.execute(query)
-        self.db.commit()
-        return result
+        users = await self.db.execute(query)
+        user = users.first()[0]
+        if user:
+            query = (
+                insert(self.model).values(user_id=user.id, success=success, user_agent=user_agent, created_at=datetime.now())
+            )
+            result = await self.db.execute(query)
+            await self.db.commit()
+            return result
