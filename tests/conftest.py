@@ -3,6 +3,7 @@ from typing import Any
 from urllib.parse import urljoin
 
 import aiohttp
+import asyncpg
 import jwt
 import pytest
 from redis.asyncio import Redis
@@ -47,6 +48,7 @@ async def client_session_w_tokens(access_token, refresh_token) -> aiohttp.Client
 
     cookies = {"access_token": access_token, "refresh_token": refresh_token}
     client_session = aiohttp.ClientSession(cookies=cookies)
+
     yield client_session
     await client_session.close()
 
@@ -75,6 +77,22 @@ async def make_get_request_w_tokens(client_session_w_tokens):
         params = params or {}
         url = urljoin(test_settings.auth_api_url, endpoint)
         async with client_session_w_tokens.get(url, params=params) as raw_response:
+            response = await raw_response.json()
+            status = raw_response.status
+
+            return status, response
+
+    return inner
+
+
+@pytest.fixture(scope="session")
+async def make_post_request(client_session):
+    """Отправка POST-запроса с AIOHTTP - сессией"""
+
+    async def inner(endpoint: str, data: dict | None = None) -> tuple[Any, Any]:
+        data = data or {}
+        url = urljoin(test_settings.auth_api_url, endpoint)
+        async with client_session.post(url, json=data) as raw_response:
             response = await raw_response.json()
             status = raw_response.status
 
@@ -138,7 +156,7 @@ async def access_token_admin():
 
 
 @pytest.fixture(scope="session")
-async def refresh_token():
+async def refresh_token_admin():
     """Creates refresh token"""
 
     iat, _, exp_refresh_token = await calculate_iat_and_exp_tokens()
@@ -147,8 +165,8 @@ async def refresh_token():
 
     refresh_token_payload = {
         "iss": "Auth service",
-        "user_login": "test_login",
-        "user_role": "test_role",
+        "user_login": "admin",
+        "user_role": "admin",
         "type": "refresh",
         "exp": exp_refresh_token,
         "iat": iat,
@@ -162,3 +180,45 @@ async def refresh_token():
     )
 
     return encoded_refresh_token
+
+
+@pytest.fixture(scope="session")
+async def refresh_token_unknown_role():
+    """Creates refresh token"""
+
+    iat, _, exp_refresh_token = await calculate_iat_and_exp_tokens()
+
+    headers = {"alg": test_settings.auth_algorithm, "typ": "JWT"}
+
+    refresh_token_payload = {
+        "iss": "Auth service",
+        "user_login": "test_login",
+        "user_role": "unknown_role",
+        "type": "refresh",
+        "exp": exp_refresh_token,
+        "iat": iat,
+    }
+
+    encoded_refresh_token: str = jwt.encode(
+        refresh_token_payload,
+        test_settings.private_key,
+        algorithm=test_settings.auth_algorithm,
+        headers=headers,
+    )
+
+    redis = Redis.from_url(
+        f"redis://{test_settings.redis.redis_host}:{test_settings.redis.redis_port}",
+    )
+    await redis.set("test_login", encoded_refresh_token, ex=864000)
+    return encoded_refresh_token
+
+
+@pytest.fixture(scope="session")
+async def delete_row_from_table():
+    async def inner(table, id_):
+        conn = await asyncpg.connect(dsn='postgresql://' + test_settings.postgres.db_dsn)
+        await conn.execute(
+            f"""delete from {table} where id = '{id_}'""")
+        await conn.close()
+
+    return inner

@@ -67,7 +67,7 @@ class UserService:
                 detail="У пользователя не совпадает рефреш токен из редиса и из cookies",
             )
 
-        await self.update_all_token(user_login, user_role)
+        await self.update_all_token(user_login, user_role, response)
 
         return JSONResponse(content={"message": "Токен обновлен"})
 
