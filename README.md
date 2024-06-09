@@ -51,6 +51,18 @@ docker-compose up --build -d
 2. python3 -m main_cli
 ```
 
+Тестирование приложения c docker-compose:
+```
+1. cd tests/
+
+2. cp .env_example .env
+
+3. docker-compose up --build
+or
+docker-compose up --build -d
+```
+
+
 Тестирование приложения локально:
 
 ```
