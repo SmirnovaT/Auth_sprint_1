@@ -85,16 +85,20 @@ async def change_password(
     password_change_data: PasswordChange | None,
     service: UserService = Depends(UserService),
 ):
-    return await service.change_password(
-        response, password_data, password_change_data
-    )
+    return await service.change_password(response, password_data, password_change_data)
+
 
 @router.get(
     "/logout",
     status_code=HTTPStatus.OK,
     summary="Выход пользователя",
 )
-async def logout(login, request: Request, response: Response, service: UserService = Depends(UserService)):
+async def logout(
+    login,
+    request: Request,
+    response: Response,
+    service: UserService = Depends(UserService),
+):
     refresh_token = request.cookies.get("refresh_token")
     await validate_token(refresh_token)
     return await service.logout(login, refresh_token, response)

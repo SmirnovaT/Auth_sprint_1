@@ -44,19 +44,6 @@ async def client_session() -> aiohttp.ClientSession:
 
 
 @pytest.fixture(scope="session")
-async def client_session_w_user_agent() -> aiohttp.ClientSession:
-    """AIOHTTP - сессия"""
-
-    headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:126.0) Gecko/20100101 Firefox/126.0"}
-
-    client_session = aiohttp.ClientSession(
-        headers=headers,
-    )
-    yield client_session
-    await client_session.close()
-
-
-@pytest.fixture(scope="session")
 async def client_session_w_tokens(access_token, refresh_token) -> aiohttp.ClientSession:
     """AIOHTTP - сессия c токенами"""
 
@@ -244,9 +231,12 @@ async def refresh_token_unknown_role():
 @pytest.fixture(scope="session")
 async def add_user_to_table():
     async def inner(id, login, email, password):
-        conn = await asyncpg.connect(dsn='postgresql://' + test_settings.postgres.db_dsn)
+        conn = await asyncpg.connect(
+            dsn="postgresql://" + test_settings.postgres.db_dsn
+        )
         await conn.execute(
-            f"""INSERT INTO users (\"id\", \"login\", \"email\", \"password\") VALUES ('{id}', '{login}', '{email}', '{password}')""")
+            f"""INSERT INTO users (\"id\", \"login\", \"email\", \"password\") VALUES ('{id}', '{login}', '{email}', '{password}')"""
+        )
         await conn.close()
 
     return inner
@@ -255,9 +245,10 @@ async def add_user_to_table():
 @pytest.fixture(scope="session")
 async def delete_row_from_table():
     async def inner(table, id_, column="id"):
-        conn = await asyncpg.connect(dsn='postgresql://' + test_settings.postgres.db_dsn)
-        await conn.execute(
-            f"""delete from {table} where {column} = '{id_}'""")
+        conn = await asyncpg.connect(
+            dsn="postgresql://" + test_settings.postgres.db_dsn
+        )
+        await conn.execute(f"""delete from {table} where {column} = '{id_}'""")
         await conn.close()
 
     return inner
@@ -266,12 +257,16 @@ async def delete_row_from_table():
 @pytest.fixture(scope="session")
 async def put_data():
     async def inner(table, data):
-        conn = await asyncpg.connect(dsn='postgresql://' + test_settings.postgres.db_dsn)
+        conn = await asyncpg.connect(
+            dsn="postgresql://" + test_settings.postgres.db_dsn
+        )
         for row in data:
-            row["created_at"] = datetime.datetime.strptime(row["created_at"], "%Y-%m-%d %H:%M:%S.%f %z")
-            columns = ', '.join(row.keys())
-            placeholders = ', '.join(f'${i + 1}' for i in range(len(row)))
-            query = f'INSERT INTO {table} ({columns}) VALUES ({placeholders})'
+            row["created_at"] = datetime.datetime.strptime(
+                row["created_at"], "%Y-%m-%d %H:%M:%S.%f %z"
+            )
+            columns = ", ".join(row.keys())
+            placeholders = ", ".join(f"${i + 1}" for i in range(len(row)))
+            query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
             await conn.execute(query, *row.values())
         await conn.close()
 

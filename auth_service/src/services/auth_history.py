@@ -2,7 +2,6 @@ from uuid import UUID
 
 from fastapi import Depends
 
-from src.db.models import User
 from src.repositories.auth_history import AuthHistoryRepository
 from src.schemas.auth_history import AuthHistoryInDB
 
@@ -25,9 +24,6 @@ class AuthHistoryService:
         """Получение истории аутентификаций"""
 
         return await self.repository.get_history(user_id, page_size, page_number)
-    async def set_history(
-            self,
-            login: str,
-            user_agent: str,
-            success: bool):
+
+    async def set_history(self, login: str, user_agent: str, success: bool):
         return await self.repository.set_history(login, user_agent, success)

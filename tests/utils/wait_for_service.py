@@ -5,8 +5,6 @@ import time
 import aiohttp
 
 
-
-
 async def get_status(service_url, client):
     raw_response = await client.get(service_url)
     return raw_response.status
@@ -22,7 +20,6 @@ async def wait_for_ok(service_url):
                     break
             except Exception as e:
                 logging.error(e)
-
 
 
 service_url = "http://auth-service:8010/api/v1/healthcheck"
