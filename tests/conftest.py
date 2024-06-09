@@ -5,6 +5,7 @@ from urllib.parse import urljoin
 import aiohttp
 import jwt
 import pytest
+import asyncpg
 from redis.asyncio import Redis
 
 from .settings import test_settings
@@ -162,3 +163,48 @@ async def refresh_token():
     )
 
     return encoded_refresh_token
+
+@pytest.fixture(scope="session")
+async def make_post_request(client_session):
+    """Отправка POST-запроса с AIOHTTP - сессией"""
+
+    async def inner(endpoint: str, data: dict | None = None) -> tuple[Any, Any]:
+        data = data or {}
+        url = urljoin(test_settings.auth_api_url, endpoint)
+        async with client_session.post(url, json=data) as raw_response:
+            response = await raw_response.json()
+            status = raw_response.status
+
+            return status, response
+
+    return inner
+
+@pytest.fixture(scope="session")
+async def delete_row_from_table():
+    async def inner(table, id_, column='id'):
+        conn = await asyncpg.connect(dsn='postgresql://' + test_settings.postgres.db_dsn)
+        await conn.execute(
+            f"""delete from {table} where {column} = '{id_}'""")
+        await conn.close()
+
+    return inner
+
+@pytest.fixture(scope="session")
+async def delete_all_users():
+    async def inner():
+        conn = await asyncpg.connect(dsn='postgres://app:123qwe@users_db:5432/postgres')
+        await conn.execute(
+            f"""delete from users""")
+        await conn.close()
+
+    return inner
+@pytest.fixture(scope="session")
+async def add_user_to_table():
+    async def inner(id, login, email, password):
+        conn = await asyncpg.connect(dsn='postgres://app:123qwe@users_db:5432/postgres')
+        await conn.execute(
+            f"""INSERT INTO users (\"id\", \"login\", \"email\", \"password\") VALUES ('{id}', '{login}', '{email}', '{password}')""")
+        await conn.close()
+
+    return inner
+
