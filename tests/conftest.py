@@ -1,11 +1,12 @@
 import asyncio
+import datetime
 from typing import Any
 from urllib.parse import urljoin
 
 import aiohttp
+import asyncpg
 import jwt
 import pytest
-import asyncpg
 from redis.asyncio import Redis
 
 from .settings import test_settings
@@ -48,6 +49,7 @@ async def client_session_w_tokens(access_token, refresh_token) -> aiohttp.Client
 
     cookies = {"access_token": access_token, "refresh_token": refresh_token}
     client_session = aiohttp.ClientSession(cookies=cookies)
+
     yield client_session
     await client_session.close()
 
@@ -79,6 +81,21 @@ async def make_get_request_w_tokens(client_session_w_tokens):
             response = await raw_response.json()
             status = raw_response.status
 
+            return status, response
+
+    return inner
+
+
+@pytest.fixture(scope="session")
+async def make_post_request(client_session):
+    """Отправка POST-запроса с AIOHTTP - сессией"""
+
+    async def inner(endpoint: str, data: dict | None = None) -> tuple[Any, Any]:
+        data = data or {}
+        url = urljoin(test_settings.auth_api_url, endpoint)
+        async with client_session.post(url, json=data) as raw_response:
+            response = await raw_response.json(content_type=None)
+            status = raw_response.status
             return status, response
 
     return inner
@@ -139,7 +156,7 @@ async def access_token_admin():
 
 
 @pytest.fixture(scope="session")
-async def refresh_token():
+async def refresh_token_admin():
     """Creates refresh token"""
 
     iat, _, exp_refresh_token = await calculate_iat_and_exp_tokens()
@@ -148,8 +165,8 @@ async def refresh_token():
 
     refresh_token_payload = {
         "iss": "Auth service",
-        "user_login": "test_login",
-        "user_role": "test_role",
+        "user_login": "admin",
+        "user_role": "admin",
         "type": "refresh",
         "exp": exp_refresh_token,
         "iat": iat,
@@ -164,24 +181,52 @@ async def refresh_token():
 
     return encoded_refresh_token
 
+
 @pytest.fixture(scope="session")
-async def make_post_request(client_session):
-    """Отправка POST-запроса с AIOHTTP - сессией"""
+async def refresh_token_unknown_role():
+    """Creates refresh token"""
 
-    async def inner(endpoint: str, data: dict | None = None) -> tuple[Any, Any]:
-        data = data or {}
-        url = urljoin(test_settings.auth_api_url, endpoint)
-        async with client_session.post(url, json=data) as raw_response:
-            response = await raw_response.json()
-            status = raw_response.status
+    iat, _, exp_refresh_token = await calculate_iat_and_exp_tokens()
 
-            return status, response
+    headers = {"alg": test_settings.auth_algorithm, "typ": "JWT"}
+
+    refresh_token_payload = {
+        "iss": "Auth service",
+        "user_login": "test_login",
+        "user_role": "unknown_role",
+        "type": "refresh",
+        "exp": exp_refresh_token,
+        "iat": iat,
+    }
+
+    encoded_refresh_token: str = jwt.encode(
+        refresh_token_payload,
+        test_settings.private_key,
+        algorithm=test_settings.auth_algorithm,
+        headers=headers,
+    )
+
+    redis = Redis.from_url(
+        f"redis://{test_settings.redis.redis_host}:{test_settings.redis.redis_port}",
+    )
+    await redis.set("test_login", encoded_refresh_token, ex=864000)
+    return encoded_refresh_token
+
+@pytest.fixture(scope="session")
+async def add_user_to_table():
+    async def inner(id, login, email, password):
+        conn = await asyncpg.connect(dsn='postgres://app:123qwe@users_db:5432/postgres')
+        await conn.execute(
+            f"""INSERT INTO users (\"id\", \"login\", \"email\", \"password\", \"role_id\") VALUES ('{id}', '{login}', '{email}', '{password}', '0dcaa9fd-409c-408a-adcf-322706022c74')""")
+        await conn.close()
 
     return inner
 
+
+
 @pytest.fixture(scope="session")
 async def delete_row_from_table():
-    async def inner(table, id_, column='id'):
+    async def inner(table, id_, column="id"):
         conn = await asyncpg.connect(dsn='postgresql://' + test_settings.postgres.db_dsn)
         await conn.execute(
             f"""delete from {table} where {column} = '{id_}'""")
@@ -189,22 +234,19 @@ async def delete_row_from_table():
 
     return inner
 
+
+
+
 @pytest.fixture(scope="session")
-async def delete_all_users():
-    async def inner():
-        conn = await asyncpg.connect(dsn='postgres://app:123qwe@users_db:5432/postgres')
-        await conn.execute(
-            f"""delete from users""")
+async def put_data():
+    async def inner(table, data):
+        conn = await asyncpg.connect(dsn='postgresql://' + test_settings.postgres.db_dsn)
+        for row in data:
+            row["created_at"] = datetime.datetime.strptime(row["created_at"], "%Y-%m-%d %H:%M:%S.%f %z")
+            columns = ', '.join(row.keys())
+            placeholders = ', '.join(f'${i+1}' for i in range(len(row)))
+            query = f'INSERT INTO {table} ({columns}) VALUES ({placeholders})'
+            await conn.execute(query, *row.values())
         await conn.close()
 
     return inner
-@pytest.fixture(scope="session")
-async def add_user_to_table():
-    async def inner(id, login, email, password):
-        conn = await asyncpg.connect(dsn='postgres://app:123qwe@users_db:5432/postgres')
-        await conn.execute(
-            f"""INSERT INTO users (\"id\", \"login\", \"email\", \"password\") VALUES ('{id}', '{login}', '{email}', '{password}')""")
-        await conn.close()
-
-    return inner
-

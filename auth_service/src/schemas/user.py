@@ -30,3 +30,8 @@ class UserInDBWRole(BaseOrjsonModel):
 class Login(BaseOrjsonModel):
     user_login: str
     password: str
+
+
+class PasswordChange(BaseOrjsonModel):
+    new_login: str | None = None
+    new_password: str | None = None

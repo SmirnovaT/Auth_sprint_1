@@ -20,6 +20,8 @@ class PostgresSettings(BaseSettings):
     postgres_db: str
     postgres_password: str
 
+    db_dsn: str
+
 
 class TestSettings(BaseSettings):
     """Конфигурация проекта для тестирования"""
