@@ -215,7 +215,7 @@ async def refresh_token_unknown_role():
 @pytest.fixture(scope="session")
 async def add_user_to_table():
     async def inner(id, login, email, password):
-        conn = await asyncpg.connect(dsn='postgres://app:123qwe@users_db:5432/postgres')
+        conn = await asyncpg.connect(dsn='postgresql://' + test_settings.postgres.db_dsn)
         await conn.execute(
             f"""INSERT INTO users (\"id\", \"login\", \"email\", \"password\", \"role_id\") VALUES ('{id}', '{login}', '{email}', '{password}', '0dcaa9fd-409c-408a-adcf-322706022c74')""")
         await conn.close()
