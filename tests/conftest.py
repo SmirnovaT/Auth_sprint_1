@@ -44,6 +44,19 @@ async def client_session() -> aiohttp.ClientSession:
 
 
 @pytest.fixture(scope="session")
+async def client_session_w_user_agent() -> aiohttp.ClientSession:
+    """AIOHTTP - сессия"""
+
+    headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:126.0) Gecko/20100101 Firefox/126.0"}
+
+    client_session = aiohttp.ClientSession(
+        headers=headers,
+    )
+    yield client_session
+    await client_session.close()
+
+
+@pytest.fixture(scope="session")
 async def client_session_w_tokens(access_token, refresh_token) -> aiohttp.ClientSession:
     """AIOHTTP - сессия c токенами"""
 
@@ -94,6 +107,21 @@ async def make_post_request(client_session):
         data = data or {}
         url = urljoin(test_settings.auth_api_url, endpoint)
         async with client_session.post(url, json=data) as raw_response:
+            response = await raw_response.json(content_type=None)
+            status = raw_response.status
+            return status, response
+
+    return inner
+
+
+@pytest.fixture(scope="session")
+async def make_post_request_w_user_agent(client_session_w_user_agent):
+    """Отправка POST-запроса с AIOHTTP - сессией"""
+
+    async def inner(endpoint: str, data: dict | None = None) -> tuple[Any, Any]:
+        data = data or {}
+        url = urljoin(test_settings.auth_api_url, endpoint)
+        async with client_session_w_user_agent.post(url, json=data) as raw_response:
             response = await raw_response.json(content_type=None)
             status = raw_response.status
             return status, response
@@ -212,16 +240,16 @@ async def refresh_token_unknown_role():
     await redis.set("test_login", encoded_refresh_token, ex=864000)
     return encoded_refresh_token
 
+
 @pytest.fixture(scope="session")
 async def add_user_to_table():
     async def inner(id, login, email, password):
         conn = await asyncpg.connect(dsn='postgresql://' + test_settings.postgres.db_dsn)
         await conn.execute(
-            f"""INSERT INTO users (\"id\", \"login\", \"email\", \"password\", \"role_id\") VALUES ('{id}', '{login}', '{email}', '{password}', '0dcaa9fd-409c-408a-adcf-322706022c74')""")
+            f"""INSERT INTO users (\"id\", \"login\", \"email\", \"password\") VALUES ('{id}', '{login}', '{email}', '{password}')""")
         await conn.close()
 
     return inner
-
 
 
 @pytest.fixture(scope="session")
@@ -235,8 +263,6 @@ async def delete_row_from_table():
     return inner
 
 
-
-
 @pytest.fixture(scope="session")
 async def put_data():
     async def inner(table, data):
@@ -244,7 +270,7 @@ async def put_data():
         for row in data:
             row["created_at"] = datetime.datetime.strptime(row["created_at"], "%Y-%m-%d %H:%M:%S.%f %z")
             columns = ', '.join(row.keys())
-            placeholders = ', '.join(f'${i+1}' for i in range(len(row)))
+            placeholders = ', '.join(f'${i + 1}' for i in range(len(row)))
             query = f'INSERT INTO {table} ({columns}) VALUES ({placeholders})'
             await conn.execute(query, *row.values())
         await conn.close()
