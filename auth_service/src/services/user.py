@@ -72,7 +72,7 @@ class UserService:
 
         return JSONResponse(content={"message": "Токен обновлен"})
 
-    async def login(self, response: Response, data: dict):
+    async def login(self, response: Response, data: Login):
         """Аутентификация пользователя"""
 
         user = jsonable_encoder(data)

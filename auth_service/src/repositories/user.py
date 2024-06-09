@@ -1,3 +1,4 @@
+from typing import Any
 from uuid import UUID
 
 from fastapi import HTTPException
@@ -82,7 +83,7 @@ class UserRepository(BaseRepository):
 
         return user.role.name if user else None
 
-    async def check_login(self, login: str, password: str) -> bool:
+    async def check_login(self, login: str, password: str) -> Any:
         """Проверка логина и пароля пользователя"""
 
         query = select(self.model).where(self.model.login == login)

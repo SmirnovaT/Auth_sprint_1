@@ -3,7 +3,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header, Response
 
-
+from src.core.logger import auth_logger
 from src.schemas.user import Login
 from src.services.user import UserService
 from src.services.auth_history import AuthHistoryService
@@ -28,6 +28,7 @@ async def login(
         res = await service.login(response, data)
         await history_service.set_history(login=data.user_login, user_agent=user_agent, success=True)
         return res
-    except:
+    except Exception as exc:
+        auth_logger.error(f"Error: {exc}")
         await history_service.set_history(login=data.user_login, user_agent=user_agent, success=False)
         raise

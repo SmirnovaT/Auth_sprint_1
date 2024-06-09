@@ -11,10 +11,13 @@ GENERAL_ROLE_URL = urljoin(test_settings.auth_api_url, GENERAL_ROLE_ENDPOINT)
 pytestmark = pytest.mark.asyncio
 
 
-async def test_get_all_roles_wo_access_401(make_get_request):
-    status, response = await make_get_request(GENERAL_ROLE_ENDPOINT)
+async def test_get_all_roles_wo_access_401(client_session):
+    client_session.cookie_jar.clear()
 
-    assert status == HTTPStatus.UNAUTHORIZED
+    async with client_session.get(GENERAL_ROLE_URL) as raw_response:
+        response = await raw_response.json()
+
+    assert raw_response.status == HTTPStatus.UNAUTHORIZED
     assert response["detail"] == "В cookies отсутствует access token"
 
 
