@@ -4,7 +4,15 @@ from urllib.parse import urljoin
 import pytest
 
 from tests.settings import test_settings
-from tests.test_data.user import registration_data
+from tests.test_data.user import (
+    registration_data,
+    change_login_data,
+    change_login_wrong_data,
+    only_login_data,
+    only_login_data_wrong,
+    only_password_data,
+    only_password_data_wrong,
+)
 
 USER_ENDPOINT = "api/v1/user"
 USER_URL = urljoin(test_settings.auth_api_url, USER_ENDPOINT)
@@ -55,3 +63,105 @@ async def test_user_creating_w_already_existing_name(
     assert response_error["detail"] == "Значение поля: 'email' не уникально"
 
     await delete_row_from_table("users", response["id"])
+
+
+async def test_login_updating_success(
+    access_token_admin, client_session, make_post_request, delete_row_from_table
+):
+    client_session.cookie_jar.update_cookies({"access_token": access_token_admin})
+    await make_post_request(USER_URL + "/signup", registration_data)
+
+    async with client_session.patch(
+        USER_URL + "/change-password",
+        json=change_login_data,
+    ) as raw_response:
+        response = await raw_response.json()
+    assert raw_response.status == 200
+    assert response["message"] == "Пароль и логин успешно обновлены"
+    await delete_row_from_table(
+        "users", change_login_data["password_change_data"]["new_login"], "login"
+    )
+
+
+async def test_login_updating_wrong(
+    access_token_admin, client_session, make_post_request, delete_row_from_table
+):
+    client_session.cookie_jar.update_cookies({"access_token": access_token_admin})
+    await make_post_request(USER_URL + "/signup", registration_data)
+
+    async with client_session.patch(
+        USER_URL + "/change-password",
+        json=change_login_wrong_data,
+    ) as raw_response:
+        response = await raw_response.json()
+    assert raw_response.status == 401
+    assert response["detail"] == "Неверный логин или пароль"
+    await delete_row_from_table("users", registration_data["login"], "login")
+
+
+async def test_only_login_updating_success(
+    access_token_admin, client_session, make_post_request, delete_row_from_table
+):
+    client_session.cookie_jar.update_cookies({"access_token": access_token_admin})
+    await make_post_request(USER_URL + "/signup", registration_data)
+
+    async with client_session.patch(
+        USER_URL + "/change-password",
+        json=only_login_data,
+    ) as raw_response:
+        response = await raw_response.json()
+    assert raw_response.status == 200
+    assert response["message"] == "Пароль и логин успешно обновлены"
+    await delete_row_from_table(
+        "users", only_login_data["password_change_data"]["new_login"], "login"
+    )
+
+
+async def test_only_login_updating_wrong(
+    access_token_admin, client_session, make_post_request, delete_row_from_table
+):
+    client_session.cookie_jar.update_cookies({"access_token": access_token_admin})
+
+    await make_post_request(USER_URL + "/signup", registration_data)
+    async with client_session.patch(
+        USER_URL + "/change-password",
+        json=only_login_data_wrong,
+    ) as raw_response:
+        response = await raw_response.json()
+    assert raw_response.status == 401
+    assert response["detail"] == "Неверный логин или пароль"
+    await delete_row_from_table("users", registration_data["login"], "login")
+
+
+async def test_only_password_updating_success(
+    access_token_admin, client_session, make_post_request, delete_row_from_table
+):
+    client_session.cookie_jar.update_cookies({"access_token": access_token_admin})
+    await make_post_request(USER_URL + "/signup", registration_data)
+
+    async with client_session.patch(
+        USER_URL + "/change-password",
+        json=only_password_data,
+    ) as raw_response:
+        response = await raw_response.json()
+    assert raw_response.status == 200
+    assert response["message"] == "Пароль и логин успешно обновлены"
+    await delete_row_from_table(
+        "users", only_login_data["password_change_data"]["new_login"], "login"
+    )
+
+
+async def test_only_password_updating_wrong(
+    access_token_admin, client_session, make_post_request, delete_row_from_table
+):
+    client_session.cookie_jar.update_cookies({"access_token": access_token_admin})
+
+    await make_post_request(USER_URL + "/signup", registration_data)
+    async with client_session.patch(
+        USER_URL + "/change-password",
+        json=only_password_data_wrong,
+    ) as raw_response:
+        response = await raw_response.json()
+    assert raw_response.status == 401
+    assert response["detail"] == "Неверный логин или пароль"
+    await delete_row_from_table("users", registration_data["login"], "login")

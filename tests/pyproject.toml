@@ -24,6 +24,7 @@ psycopg2-binary="^2.9.9"
 pyjwt = "^2.8.0"
 cryptography = "^42.0.7"
 asyncpg = "^0.29.0"
+werkzeug = "^3.0.3"
 
 
 [build-system]
