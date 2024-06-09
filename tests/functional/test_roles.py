@@ -70,7 +70,7 @@ async def test_role_creating_success(access_token_admin, client_session):
         assert isinstance(response["created_at"], str)
         assert response["updated_at"] is None
 
-    await client_session.delete(GENERAL_ROLE_URL, params={"role_id": response["id"]})
+    await client_session.delete(GENERAL_ROLE_URL, params={"role_name": params["role_name"]})
 
 
 async def test_role_updating_not_found(access_token_admin, client_session):
