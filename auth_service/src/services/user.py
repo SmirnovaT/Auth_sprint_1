@@ -15,6 +15,7 @@ from src.repositories.role import RoleRepository
 from src.schemas.user import UserCreate, UserInDB, UserInDBWRole, Login
 from src.repositories.user import UserRepository
 from src.utils.jwt import validate_token, create_access_and_refresh_tokens
+from src.schemas.user import PasswordChange
 
 
 class UserService:
@@ -52,7 +53,7 @@ class UserService:
         return await self.repository.remove_user_role(login, role_id)
 
     async def refresh_token(
-        self, refresh_token: str, response: Response
+            self, refresh_token: str, response: Response
     ) -> JSONResponse:
         """Обновление токенов по рефреш токену"""
 
@@ -67,7 +68,7 @@ class UserService:
                 detail="У пользователя не совпадает рефреш токен из редиса и из cookies",
             )
 
-        await self.update_all_token(user_login, user_role)
+        await self.update_all_token(user_login, user_role, response)
 
         return JSONResponse(content={"message": "Токен обновлен"})
 
@@ -80,9 +81,10 @@ class UserService:
         role = await self.repository.role_name_by_id(user_db.role_id)
 
         await self.update_all_token(user.user_login, role, response)
+        return JSONResponse(content={"message": "Вход успешно выполнен"})
 
     async def change_password(
-        self, response: Response, password_data: dict, new_login: str, new_password: str
+            self, response: Response, password_data: dict, password_change_data: dict | None
     ) -> JSONResponse:
         """Смена пароля пользователем"""
 
@@ -92,10 +94,13 @@ class UserService:
         user_to_update = await self.repository.check_login(
             user.user_login, user.password
         )
-        if new_password:
-            user_to_update.password = generate_password_hash(new_password)
-        if new_login:
-            user_to_update.login = new_login
+        new_login_data = jsonable_encoder(password_change_data)
+        new_login_data = PasswordChange(**new_login_data)
+
+        if new_login_data.new_password:
+            user_to_update.password = generate_password_hash(new_login_data.new_password)
+        if new_login_data.new_login:
+            user_to_update.login = new_login_data.new_login
 
         await self.repository.update(user_to_update)
 
@@ -108,7 +113,7 @@ class UserService:
         return JSONResponse(content={"message": "Пароль и логин успешно обновлены"})
 
     async def update_all_token(
-        self, user_login: str, role: str, response: Response
+            self, user_login: str, role: str, response: Response
     ) -> None:
         """Обновление токенов"""
 
@@ -122,7 +127,6 @@ class UserService:
         await self.cache.create_or_update_record(user_login, refresh_token)
 
         auth_logger.info("Токены обновлены")
-
 
     async def logout(self, login, refresh_token: str, response: Response):
         await self.cache.delete_record(login)

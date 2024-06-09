@@ -52,7 +52,7 @@ async def test_role_creating_w_already_existing_name(
         response = await raw_response.json()
 
         assert raw_response.status == 400
-        assert response["detail"] == (f"Роль с названием '{params["role_name"]}' "
+        assert response["detail"] == (f"Роль с названием '{params['role_name']}' "
                                       f"уже существует")
 
 
@@ -106,7 +106,7 @@ async def test_role_updating_success(access_token_admin, client_session):
         assert isinstance(response["updated_at"], str)
 
     await client_session.patch(
-        GENERAL_ROLE_URL + f"/{response["name"]}",
+        GENERAL_ROLE_URL + f"/{response['name']}",
         params={"new_role_name": old_role_name},
     )
 
@@ -120,7 +120,7 @@ async def test_role_deleting_not_found(access_token_admin, client_session):
         response = await raw_response.json()
 
         assert raw_response.status == 404
-        assert response["detail"] == f"Роли с name '{params["role_name"]}' не существует"
+        assert response["detail"] == f"Роли с name '{params['role_name']}' не существует"
 
 
 async def test_role_deleting_success(access_token_admin, client_session):
