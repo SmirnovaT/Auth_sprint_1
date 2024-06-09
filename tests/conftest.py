@@ -216,8 +216,10 @@ async def refresh_token_unknown_role():
 async def add_user_to_table():
     async def inner(id, login, email, password):
         conn = await asyncpg.connect(dsn='postgres://app:123qwe@users_db:5432/postgres')
+        res = await conn.fetchrow("""SELECT id FROM roles WHERE name = 'general'""")
+        role_id = res[0]
         await conn.execute(
-            f"""INSERT INTO users (\"id\", \"login\", \"email\", \"password\", \"role_id\") VALUES ('{id}', '{login}', '{email}', '{password}', '0dcaa9fd-409c-408a-adcf-322706022c74')""")
+            f"""INSERT INTO users (\"id\", \"login\", \"email\", \"password\", \"role_id\") VALUES ('{id}', '{login}', '{email}', '{password}', '{role_id}')""")
         await conn.close()
 
     return inner
