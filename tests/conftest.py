@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 from typing import Any
 from urllib.parse import urljoin
 
@@ -219,6 +220,23 @@ async def delete_row_from_table():
         conn = await asyncpg.connect(dsn='postgresql://' + test_settings.postgres.db_dsn)
         await conn.execute(
             f"""delete from {table} where id = '{id_}'""")
+        await conn.close()
+
+    return inner
+
+
+
+
+@pytest.fixture(scope="session")
+async def put_data():
+    async def inner(table, data):
+        conn = await asyncpg.connect(dsn='postgresql://' + test_settings.postgres.db_dsn)
+        for row in data:
+            row["created_at"] = datetime.datetime.strptime(row["created_at"], "%Y-%m-%d %H:%M:%S.%f %z")
+            columns = ', '.join(row.keys())
+            placeholders = ', '.join(f'${i+1}' for i in range(len(row)))
+            query = f'INSERT INTO {table} ({columns}) VALUES ({placeholders})'
+            await conn.execute(query, *row.values())
         await conn.close()
 
     return inner

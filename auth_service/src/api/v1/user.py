@@ -6,6 +6,7 @@ from src.constants.permissions import PERMISSIONS
 from src.schemas.user import UserCreate, UserInDB, UserInDBWRole, Login
 from src.services.user import UserService
 from src.utils.jwt import check_token_and_role, validate_token
+from src.schemas.user import PasswordChange
 
 router = APIRouter(tags=["user"])
 
@@ -81,12 +82,11 @@ async def refresh_token(
 async def change_password(
     response: Response,
     password_data: Login,
-    new_login: str | None = None,
-    new_password: str | None = None,
+    password_change_data: PasswordChange | None,
     service: UserService = Depends(UserService),
 ):
     return await service.change_password(
-        response, password_data, new_login, new_password
+        response, password_data, password_change_data
     )
 
 @router.get(
