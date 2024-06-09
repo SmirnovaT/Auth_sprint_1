@@ -21,8 +21,12 @@ async def test_get_all_roles_wo_access_401(client_session):
     assert response["detail"] == "В cookies отсутствует access token"
 
 
-async def test_get_all_roles_w_wrong_role_403(access_token_unknown_role, client_session):
-    client_session.cookie_jar.update_cookies({"access_token": access_token_unknown_role})
+async def test_get_all_roles_w_wrong_role_403(
+    access_token_unknown_role, client_session
+):
+    client_session.cookie_jar.update_cookies(
+        {"access_token": access_token_unknown_role}
+    )
 
     async with client_session.get(GENERAL_ROLE_URL) as raw_response:
         response = await raw_response.json()
@@ -45,7 +49,8 @@ async def test_get_all_roles_success_200(access_token_admin, client_session):
 
 
 async def test_role_creating_w_already_existing_name(
-        access_token_admin, client_session,
+    access_token_admin,
+    client_session,
 ):
     client_session.cookie_jar.update_cookies({"access_token": access_token_admin})
 
@@ -55,8 +60,9 @@ async def test_role_creating_w_already_existing_name(
         response = await raw_response.json()
 
         assert raw_response.status == 400
-        assert response["detail"] == (f"Роль с названием '{params['role_name']}' "
-                                      f"уже существует")
+        assert response["detail"] == (
+            f"Роль с названием '{params['role_name']}' " f"уже существует"
+        )
 
 
 async def test_role_creating_success(access_token_admin, client_session):
@@ -73,7 +79,9 @@ async def test_role_creating_success(access_token_admin, client_session):
         assert isinstance(response["created_at"], str)
         assert response["updated_at"] is None
 
-    await client_session.delete(GENERAL_ROLE_URL, params={"role_name": params["role_name"]})
+    await client_session.delete(
+        GENERAL_ROLE_URL, params={"role_name": params["role_name"]}
+    )
 
 
 async def test_role_updating_not_found(access_token_admin, client_session):
@@ -83,12 +91,16 @@ async def test_role_updating_not_found(access_token_admin, client_session):
     params = {"new_role_name": "some_role_for_updating"}
 
     async with client_session.patch(
-            GENERAL_ROLE_URL + f"/{non_existent_role_name}", params=params,
+        GENERAL_ROLE_URL + f"/{non_existent_role_name}",
+        params=params,
     ) as raw_response:
         response = await raw_response.json()
 
         assert raw_response.status == 404
-        assert response["detail"] == f"Роли с name '{non_existent_role_name}' не существует"
+        assert (
+            response["detail"]
+            == f"Роли с name '{non_existent_role_name}' не существует"
+        )
 
 
 async def test_role_updating_success(access_token_admin, client_session):
@@ -98,7 +110,8 @@ async def test_role_updating_success(access_token_admin, client_session):
     params = {"new_role_name": "some_role_for_updating"}
 
     async with client_session.patch(
-            GENERAL_ROLE_URL + f"/{old_role_name}", params=params,
+        GENERAL_ROLE_URL + f"/{old_role_name}",
+        params=params,
     ) as raw_response:
         response = await raw_response.json()
 
@@ -123,7 +136,9 @@ async def test_role_deleting_not_found(access_token_admin, client_session):
         response = await raw_response.json()
 
         assert raw_response.status == 404
-        assert response["detail"] == f"Роли с name '{params['role_name']}' не существует"
+        assert (
+            response["detail"] == f"Роли с name '{params['role_name']}' не существует"
+        )
 
 
 async def test_role_deleting_success(access_token_admin, client_session):

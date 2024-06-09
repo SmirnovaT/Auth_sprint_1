@@ -22,13 +22,17 @@ async def login(
     response: Response,
     service: UserService = Depends(UserService),
     user_agent: Annotated[str | None, Header()] = None,
-    history_service: AuthHistoryService = Depends(AuthHistoryService)
+    history_service: AuthHistoryService = Depends(AuthHistoryService),
 ):
     try:
         res = await service.login(response, data)
-        await history_service.set_history(login=data.user_login, user_agent=user_agent, success=True)
+        await history_service.set_history(
+            login=data.user_login, user_agent=user_agent, success=True
+        )
         return res
     except Exception as exc:
         auth_logger.error(f"Error: {exc}")
-        await history_service.set_history(login=data.user_login, user_agent=user_agent, success=False)
+        await history_service.set_history(
+            login=data.user_login, user_agent=user_agent, success=False
+        )
         raise

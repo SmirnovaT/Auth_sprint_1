@@ -40,7 +40,7 @@ async def calculate_iat_and_exp_tokens() -> Tuple[int, int, int]:
 
 
 async def create_access_and_refresh_tokens(
-        user_login: str, user_role: str
+    user_login: str, user_role: str
 ) -> Tuple[str, str]:
     """Creates a pair of access and refresh tokens"""
 
@@ -93,7 +93,7 @@ async def validate_token(token: str) -> dict[str, str]:
         decoded_token: dict[str, str] = jwt.decode(
             jwt=token,
             key=settings.public_key,
-            algorithms=['RS256'],
+            algorithms=["RS256"],
         )
     except jwt.exceptions.DecodeError as decode_error:
         auth_logger.error(f"Error while JWT decoding: {decode_error}")
@@ -111,7 +111,9 @@ async def validate_token(token: str) -> dict[str, str]:
 async def check_token_and_role(request: Request, roles: list) -> None:
     access_token = request.cookies.get("access_token")
     if not access_token:
-        raise HTTPException(status_code=401, detail="В cookies отсутствует access token")
+        raise HTTPException(
+            status_code=401, detail="В cookies отсутствует access token"
+        )
 
     decoded_token = await validate_token(access_token)
     if decoded_token.get("user_role") not in roles:

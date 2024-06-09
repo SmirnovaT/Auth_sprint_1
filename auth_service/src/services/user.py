@@ -53,7 +53,7 @@ class UserService:
         return await self.repository.remove_user_role(login, role_id)
 
     async def refresh_token(
-            self, refresh_token: str, response: Response
+        self, refresh_token: str, response: Response
     ) -> JSONResponse:
         """Обновление токенов по рефреш токену"""
 
@@ -84,7 +84,7 @@ class UserService:
         return JSONResponse(content={"message": "Вход успешно выполнен"})
 
     async def change_password(
-            self, response: Response, password_data: dict, password_change_data: dict | None
+        self, response: Response, password_data: dict, password_change_data: dict | None
     ) -> JSONResponse:
         """Смена пароля пользователем"""
 
@@ -98,7 +98,9 @@ class UserService:
         new_login_data = PasswordChange(**new_login_data)
 
         if new_login_data.new_password:
-            user_to_update.password = generate_password_hash(new_login_data.new_password)
+            user_to_update.password = generate_password_hash(
+                new_login_data.new_password
+            )
         if new_login_data.new_login:
             user_to_update.login = new_login_data.new_login
 
@@ -113,7 +115,7 @@ class UserService:
         return JSONResponse(content={"message": "Пароль и логин успешно обновлены"})
 
     async def update_all_token(
-            self, user_login: str, role: str, response: Response
+        self, user_login: str, role: str, response: Response
     ) -> None:
         """Обновление токенов"""
 

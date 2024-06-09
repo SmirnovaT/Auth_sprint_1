@@ -24,7 +24,7 @@ services:
     networks:
       - authnetwork
     volumes:
-      - ./db_data/postgres_data:/var/lib/postgresql/data
+      - ./db_data/postgres_data2:/var/lib/postgresql/data
     healthcheck:
        test: ["CMD-SHELL", "pg_isready -h localhost -U $$POSTGRES_USER -d $$POSTGRES_DB"]
        interval: 5s
