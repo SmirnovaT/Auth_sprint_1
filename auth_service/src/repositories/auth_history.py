@@ -40,10 +40,10 @@ class AuthHistoryRepository(BaseRepository):
             .where(models.User.login == login)
         )
         users = await self.db.execute(query)
-        user = users.first()[0]
+        user = users.first()
         if user:
             query = (
-                insert(self.model).values(user_id=user.id, success=success, user_agent=user_agent, created_at=datetime.now())
+                insert(self.model).values(user_id=user[0].id, success=success, user_agent=user_agent, created_at=datetime.now())
             )
             result = await self.db.execute(query)
             await self.db.commit()
