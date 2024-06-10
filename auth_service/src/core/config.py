@@ -37,6 +37,8 @@ class Settings(BaseSettings):
     page_size: int = 10
     page_number: int = 1
 
+    echo: bool = True
+
     model_config = SettingsConfigDict(
         env_file=Path(__file__).resolve().parent.parent.parent / ".env", extra="ignore"
     )
