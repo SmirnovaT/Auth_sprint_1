@@ -1,3 +1,5 @@
+from typing import Annotated, Optional
+
 import typer
 from sqlalchemy import create_engine, select
 from sqlalchemy.exc import IntegrityError
@@ -7,31 +9,41 @@ from src.core.config import settings
 from src.core.logger import auth_logger
 from src.db.models import User, Role
 
-ENGINE = create_engine(f"postgresql://{settings.db_dsn}")
+ENGINE = create_engine(f"postgresql+psycopg2://{settings.db_dsn}")
 
 
-def create_admin():
+def create_admin(
+    login: Annotated[str, typer.Argument()],
+    password: Annotated[str, typer.Argument()],
+    email: Annotated[str, typer.Argument()],
+    role_name: Annotated[str, typer.Argument()],
+    first_name: Annotated[Optional[str], typer.Argument()] = None,
+    last_name: Annotated[Optional[str], typer.Argument()] = None,
+):
+    """
+    CLI command for user with admin role creation
+    """
     try:
         with Session(ENGINE) as session:
             admin_role = session.scalar(
-                select(Role).where(Role.name == settings.admin_role_name)
+                select(Role).where(Role.name == role_name)
             )
             if not admin_role:
-                admin_role = Role(name=settings.admin_role_name)
+                admin_role = Role(name=role_name)
                 session.add(admin_role)
                 session.commit()
                 session.refresh(admin_role)
 
             admin_user = session.scalar(
-                select(User).where(User.login == settings.admin_login)
+                select(User).where(User.login == login)
             )
             if not admin_user:
                 admin_user = User(
-                    login=settings.admin_login,
-                    email=settings.admin_email,
-                    password=settings.admin_password,
-                    first_name=settings.admin_login,
-                    last_name=settings.admin_login,
+                    login=login,
+                    email=email,
+                    password=password,
+                    first_name=first_name,
+                    last_name=last_name,
                 )
                 try:
                     session.add(admin_user)
@@ -43,7 +55,7 @@ def create_admin():
 
                     auth_logger.info(
                         f"Создан админ '{admin_user.login}' "
-                        f"с ролью '{settings.admin_role_name}'",
+                        f"с ролью '{role_name}'",
                     )
 
                     SystemExit(0)
@@ -60,7 +72,7 @@ def create_admin():
 
                 auth_logger.info(
                     f"Админ '{admin_user.login}' существует, "
-                    f"для него назначена роль '{settings.admin_role_name}'",
+                    f"для него назначена роль '{role_name}'",
                 )
 
             raise SystemExit(0)
