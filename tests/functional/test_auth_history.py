@@ -74,7 +74,7 @@ async def test_all_auth_histories_success_200(
     ) as raw_response:
         response = await raw_response.json()
         assert raw_response.status == HTTPStatus.OK
-        assert len(response) == 2
+        assert response["total"] == 2
 
     await delete_row_from_table(
         "authentication_histories", "1ed4dd3b-6235-4920-ab23-d51bafb5cbb2"
