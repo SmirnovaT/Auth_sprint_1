@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import time
+from http import HTTPStatus
 
 import aiohttp
 
@@ -16,7 +17,7 @@ async def wait_for_ok(service_url):
             time.sleep(10)
             try:
                 status = await get_status(service_url, client)
-                if status == 200:
+                if status == HTTPStatus.OK:
                     break
             except Exception as e:
                 logging.error(e)

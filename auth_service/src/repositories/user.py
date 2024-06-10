@@ -1,8 +1,9 @@
+from http import HTTPStatus
 from typing import Any
 from uuid import UUID
 
 from fastapi import HTTPException
-from sqlalchemy import select, insert
+from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
 from src.db import models
@@ -29,13 +30,15 @@ class UserRepository(BaseRepository):
         )
         if not user_to_update:
             raise HTTPException(
-                status_code=404, detail=f"Пользователя с login '{login}' не существует"
+                status_code=HTTPStatus.NOT_FOUND,
+                detail=f"Пользователя с login '{login}' не существует",
             )
 
         role = await self.db.scalar(select(Role).where(Role.id == role_id))
         if not role:
             raise HTTPException(
-                status_code=404, detail=f"Роли с id '{role_id}' не существует"
+                status_code=HTTPStatus.NOT_FOUND,
+                detail=f"Роли с id '{role_id}' не существует",
             )
 
         user_to_update.role_id = role_id
@@ -51,13 +54,15 @@ class UserRepository(BaseRepository):
         )
         if not user_to_role_delete:
             raise HTTPException(
-                status_code=404, detail=f"Пользователя с login '{login}' не существует"
+                status_code=HTTPStatus.NOT_FOUND,
+                detail=f"Пользователя с login '{login}' не существует",
             )
 
         role = await self.db.scalar(select(Role).where(Role.id == role_id))
         if not role:
             raise HTTPException(
-                status_code=404, detail=f"Роли с id '{role_id}' не существует"
+                status_code=HTTPStatus.NOT_FOUND,
+                detail=f"Роли с id '{role_id}' не существует",
             )
 
         user_to_role_delete.role_id = None
@@ -91,7 +96,9 @@ class UserRepository(BaseRepository):
         user = result.scalar()
 
         if not (user and user.check_password(password)):
-            raise HTTPException(status_code=401, detail=f"Неверный логин или пароль")
+            raise HTTPException(
+                status_code=HTTPStatus.UNAUTHORIZED, detail=f"Неверный логин или пароль"
+            )
         return user
 
     async def role_name_by_id(self, role_id: UUID) -> str:

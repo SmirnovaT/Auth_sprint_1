@@ -59,7 +59,7 @@ async def test_role_creating_w_already_existing_name(
     async with client_session.post(GENERAL_ROLE_URL, params=params) as raw_response:
         response = await raw_response.json()
 
-        assert raw_response.status == 400
+        assert raw_response.status == HTTPStatus.BAD_REQUEST
         assert response["detail"] == (
             f"Роль с названием '{params['role_name']}' " f"уже существует"
         )
@@ -73,7 +73,7 @@ async def test_role_creating_success(access_token_admin, client_session):
     async with client_session.post(GENERAL_ROLE_URL, params=params) as raw_response:
         response = await raw_response.json()
 
-        assert raw_response.status == 201
+        assert raw_response.status == HTTPStatus.CREATED
         assert "id" in response
         assert response["name"] == "new_role"
         assert isinstance(response["created_at"], str)
@@ -96,7 +96,7 @@ async def test_role_updating_not_found(access_token_admin, client_session):
     ) as raw_response:
         response = await raw_response.json()
 
-        assert raw_response.status == 404
+        assert raw_response.status == HTTPStatus.NOT_FOUND
         assert (
             response["detail"]
             == f"Роли с name '{non_existent_role_name}' не существует"
@@ -115,7 +115,7 @@ async def test_role_updating_success(access_token_admin, client_session):
     ) as raw_response:
         response = await raw_response.json()
 
-        assert raw_response.status == 200
+        assert raw_response.status == HTTPStatus.OK
         assert "id" in response
         assert response["name"] == params["new_role_name"]
         assert isinstance(response["created_at"], str)
@@ -135,7 +135,7 @@ async def test_role_deleting_not_found(access_token_admin, client_session):
     async with client_session.delete(GENERAL_ROLE_URL, params=params) as raw_response:
         response = await raw_response.json()
 
-        assert raw_response.status == 404
+        assert raw_response.status == HTTPStatus.NOT_FOUND
         assert (
             response["detail"] == f"Роли с name '{params['role_name']}' не существует"
         )
@@ -149,7 +149,7 @@ async def test_role_deleting_success(access_token_admin, client_session):
     async with client_session.delete(GENERAL_ROLE_URL, params=params) as raw_response:
         response = await raw_response.json()
 
-        assert raw_response.status == 204
+        assert raw_response.status == HTTPStatus.NO_CONTENT
         assert response is None
 
     await client_session.post(GENERAL_ROLE_URL, params={"role_name": "subscriber"})
