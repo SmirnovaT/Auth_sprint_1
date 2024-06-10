@@ -27,11 +27,6 @@ class Settings(BaseSettings):
     redis_password: str
     cache_expire_in_seconds: int = 864000
 
-    admin_login: str
-    admin_email: str
-    admin_password: str
-    admin_role_name: str
-
     default_user_role: str
 
     page_size: int = 10

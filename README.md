@@ -46,9 +46,15 @@ docker-compose up --build -d
 Создание пользователя с ролью 'admin' с помощью CLI
 
 ```
-1. cd auth_service/src/commands
+1. cd auth_service
 
-2. python3 -m main_cli
+2. python3 -m src.commands.main_cli admin strongpassword admin@mail.ru admin 
+
+   or with first name and/or last name
+   
+   python3 -m src.commands.main_cli admin strongpassword admin@mail.ru admin Ivan Petrov
+   
+If you heed help, please use: python3 -m src.commands.main_cli --help 
 ```
 
 Тестирование приложения c docker-compose:
