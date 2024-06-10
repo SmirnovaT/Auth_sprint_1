@@ -18,12 +18,10 @@ class AuthHistoryService:
     async def get_history(
         self,
         user_id: UUID,
-        page_size: int = 10,
-        page_number: int = 1,
     ) -> list[AuthHistoryInDB]:
         """Получение истории аутентификаций"""
 
-        return await self.repository.get_history(user_id, page_size, page_number)
+        return await self.repository.get_history(user_id)
 
     async def set_history(self, login: str, user_agent: str, success: bool):
         return await self.repository.set_history(login, user_agent, success)
