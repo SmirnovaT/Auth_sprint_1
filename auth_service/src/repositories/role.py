@@ -1,7 +1,9 @@
 from uuid import UUID
+from http import HTTPStatus
 
 from fastapi import HTTPException
 from sqlalchemy import select
+
 
 from src.db import models
 from src.db.models import Role
@@ -27,7 +29,8 @@ class RoleRepository(BaseRepository):
         )
         if role_already_exist:
             raise HTTPException(
-                status_code=400, detail=f"Роль с названием '{role_name}' уже существует"
+                status_code=HTTPStatus.BAD_REQUEST,
+                detail=f"Роль с названием '{role_name}' уже существует",
             )
 
         created_role = await self.create(Role(name=role_name))
@@ -42,7 +45,8 @@ class RoleRepository(BaseRepository):
         )
         if not role_to_update:
             raise HTTPException(
-                status_code=404, detail=f"Роли с name '{old_role_name}' не существует"
+                status_code=HTTPStatus.NOT_FOUND,
+                detail=f"Роли с name '{old_role_name}' не существует",
             )
 
         role_to_update.name = new_role_name
@@ -58,7 +62,8 @@ class RoleRepository(BaseRepository):
         )
         if not role_to_delete:
             raise HTTPException(
-                status_code=404, detail=f"Роли с name '{role_name}' не существует"
+                status_code=HTTPStatus.NOT_FOUND,
+                detail=f"Роли с name '{role_name}' не существует",
             )
 
         await self.delete(role_to_delete)

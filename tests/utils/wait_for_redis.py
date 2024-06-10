@@ -1,6 +1,3 @@
-import time
-import logging
-
 import backoff
 from redis import Redis
 from redis.exceptions import ConnectionError

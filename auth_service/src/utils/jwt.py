@@ -1,6 +1,7 @@
 import calendar
 import datetime as dt
 from datetime import datetime, timedelta
+from http import HTTPStatus
 from typing import Tuple
 
 import jwt
@@ -81,7 +82,10 @@ async def create_access_and_refresh_tokens(
         )
     except (TypeError, ValueError) as err:
         auth_logger.error(f"Error while JWT encoding: {err}")
-        raise HTTPException(status_code=500, detail="Error while JWT encoding")
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail="Error while JWT encoding",
+        )
 
     return encoded_access_token, encoded_refresh_token
 
@@ -97,13 +101,20 @@ async def validate_token(token: str) -> dict[str, str]:
         )
     except jwt.exceptions.DecodeError as decode_error:
         auth_logger.error(f"Error while JWT decoding: {decode_error}")
-        raise HTTPException(status_code=401, detail="Неверный токен")
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED, detail="Неверный токен"
+        )
     except jwt.ExpiredSignatureError:
         auth_logger.error("Срок действия токена истек")
-        raise HTTPException(status_code=401, detail="Срок действия токена истек")
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED, detail="Срок действия токена истек"
+        )
     except ValueError as err:
         auth_logger.error(f"Error while JWT decoding: {err}")
-        raise HTTPException(status_code=500, detail="Error while JWT decoding")
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail="Error while JWT decoding",
+        )
 
     return decoded_token
 
@@ -112,9 +123,12 @@ async def check_token_and_role(request: Request, roles: list) -> None:
     access_token = request.cookies.get("access_token")
     if not access_token:
         raise HTTPException(
-            status_code=401, detail="В cookies отсутствует access token"
+            status_code=HTTPStatus.UNAUTHORIZED,
+            detail="В cookies отсутствует access token",
         )
 
     decoded_token = await validate_token(access_token)
     if decoded_token.get("user_role") not in roles:
-        raise HTTPException(status_code=403, detail="Нет прав для совершения действия")
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN, detail="Нет прав для совершения действия"
+        )

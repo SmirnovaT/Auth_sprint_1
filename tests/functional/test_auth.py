@@ -59,7 +59,7 @@ async def test_user_creating_w_already_existing_name(
     status, response_error = await make_post_request(
         USER_URL + "/signup", registration_data
     )
-    assert status == 400
+    assert status == HTTPStatus.BAD_REQUEST
     assert response_error["detail"] == "Значение поля: 'email' не уникально"
 
     await delete_row_from_table("users", response["id"])
@@ -76,7 +76,7 @@ async def test_login_updating_success(
         json=change_login_data,
     ) as raw_response:
         response = await raw_response.json()
-    assert raw_response.status == 200
+    assert raw_response.status == HTTPStatus.OK
     assert response["message"] == "Пароль и логин успешно обновлены"
     await delete_row_from_table(
         "users", change_login_data["password_change_data"]["new_login"], "login"
@@ -94,7 +94,7 @@ async def test_login_updating_wrong(
         json=change_login_wrong_data,
     ) as raw_response:
         response = await raw_response.json()
-    assert raw_response.status == 401
+    assert raw_response.status == HTTPStatus.UNAUTHORIZED
     assert response["detail"] == "Неверный логин или пароль"
     await delete_row_from_table("users", registration_data["login"], "login")
 
@@ -110,7 +110,7 @@ async def test_only_login_updating_success(
         json=only_login_data,
     ) as raw_response:
         response = await raw_response.json()
-    assert raw_response.status == 200
+    assert raw_response.status == HTTPStatus.OK
     assert response["message"] == "Пароль и логин успешно обновлены"
     await delete_row_from_table(
         "users", only_login_data["password_change_data"]["new_login"], "login"
@@ -128,7 +128,7 @@ async def test_only_login_updating_wrong(
         json=only_login_data_wrong,
     ) as raw_response:
         response = await raw_response.json()
-    assert raw_response.status == 401
+    assert raw_response.status == HTTPStatus.UNAUTHORIZED
     assert response["detail"] == "Неверный логин или пароль"
     await delete_row_from_table("users", registration_data["login"], "login")
 
@@ -144,7 +144,7 @@ async def test_only_password_updating_success(
         json=only_password_data,
     ) as raw_response:
         response = await raw_response.json()
-    assert raw_response.status == 200
+    assert raw_response.status == HTTPStatus.OK
     assert response["message"] == "Пароль и логин успешно обновлены"
     await delete_row_from_table(
         "users", only_login_data["password_change_data"]["new_login"], "login"
@@ -162,6 +162,6 @@ async def test_only_password_updating_wrong(
         json=only_password_data_wrong,
     ) as raw_response:
         response = await raw_response.json()
-    assert raw_response.status == 401
+    assert raw_response.status == HTTPStatus.UNAUTHORIZED
     assert response["detail"] == "Неверный логин или пароль"
     await delete_row_from_table("users", registration_data["login"], "login")

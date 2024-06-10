@@ -1,5 +1,6 @@
 import uuid
 import random
+from http import HTTPStatus
 
 import pytest
 from werkzeug.security import generate_password_hash
@@ -21,7 +22,7 @@ async def test_user_login_with_wrong_pass(
         LOGIN_ENDPOINT, data={"user_login": login, "password": "WrongPassword"}
     )
 
-    assert status == 401
+    assert status == HTTPStatus.UNAUTHORIZED
 
     await delete_row_from_table("authentication_histories", id, "user_id")
     await delete_row_from_table("users", id)
@@ -44,6 +45,6 @@ async def test_user_login_with_wrong_user(
         data={"user_login": "WrongUser", "password": "Password"},
     )
 
-    assert status == 401
+    assert status == HTTPStatus.UNAUTHORIZED
 
     await delete_row_from_table("users", id)
